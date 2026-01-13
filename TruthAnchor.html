@@ -1,0 +1,2177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>⟨ TruthAnchor v1 ⟩ — Byzantine Fault-Tolerant Epistemic Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a24;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --text-muted: #555;
+            --accent-green: #44ff88;
+            --accent-red: #ff4444;
+            --accent-orange: #ffaa00;
+            --accent-blue: #66aaff;
+            --accent-purple: #aa66ff;
+            --accent-cyan: #66ffaa;
+            --accent-gold: #ffcc00;
+            --border-dark: #333;
+            --border-light: #444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.4;
+        }
+
+        h1 {
+            background: linear-gradient(90deg, #aa66ff, #66ffaa, #ffaa66, #66aaff, #ff66aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            font-size: 1.6em;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .version-badge {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--accent-green);
+            border-radius: 4px;
+            padding: 4px 12px;
+            font-size: 0.7em;
+            color: var(--accent-green);
+            margin-bottom: 12px;
+        }
+
+        .core-principle {
+            background: linear-gradient(135deg, #0a1a0f, #0f0a1a);
+            border: 2px solid var(--accent-gold);
+            border-radius: 8px;
+            padding: 15px 25px;
+            margin-bottom: 15px;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .core-principle blockquote {
+            font-style: italic;
+            color: var(--accent-gold);
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+
+        .core-principle .subtext {
+            font-size: 0.7em;
+            color: var(--text-secondary);
+        }
+
+        .dimension-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .dim-btn {
+            padding: 8px 16px;
+            font-size: 0.8em;
+            font-weight: bold;
+            border-radius: 4px;
+            border: 2px solid var(--border-light);
+            cursor: pointer;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .dim-btn:hover { border-color: #666; color: #aaa; }
+        .dim-btn.active { 
+            border-color: var(--accent-green); 
+            color: var(--accent-green); 
+            background: #0a1a0f;
+            box-shadow: 0 0 10px rgba(68, 255, 136, 0.3);
+        }
+
+        .dim-btn.d5 { --dim-color: #aa66ff; }
+        .dim-btn.d6 { --dim-color: #66ffaa; }
+        .dim-btn.d7 { --dim-color: #ffaa66; }
+        .dim-btn.d8 { --dim-color: #66aaff; }
+        .dim-btn.d9 { --dim-color: #ff6666; }
+
+        .dim-btn.d5.active, .dim-btn.d6.active, .dim-btn.d7.active, 
+        .dim-btn.d8.active, .dim-btn.d9.active { 
+            border-color: var(--dim-color); 
+            color: var(--dim-color); 
+        }
+
+        .truth-anchor-panel {
+            background: linear-gradient(135deg, #0a1a0a, #0a0a1a);
+            border: 3px solid var(--accent-green);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+        }
+
+        .truth-anchor-panel::before {
+            content: '⚓';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-primary);
+            padding: 0 10px;
+            font-size: 1.2em;
+        }
+
+        .truth-anchor-panel h3 {
+            color: var(--accent-green);
+            font-size: 0.85em;
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        .anchor-outputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .anchor-output {
+            background: #0a0a12;
+            border: 1px solid var(--border-dark);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .anchor-output-label {
+            font-size: 0.55em;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .anchor-output-value {
+            font-size: 1.1em;
+            font-family: Georgia, serif;
+            color: var(--accent-green);
+        }
+
+        .anchor-output.ratio .anchor-output-value { color: #88ffcc; }
+        .anchor-output.error .anchor-output-value { color: #ffaa66; }
+        .anchor-output.quorum .anchor-output-value { color: var(--accent-blue); }
+
+        .anchor-state {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .state-badge {
+            padding: 6px 15px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .state-badge.valid {
+            background: #0a2a0f;
+            border: 2px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .state-badge.degraded {
+            background: #2a2a0a;
+            border: 2px solid var(--accent-orange);
+            color: var(--accent-orange);
+            animation: degraded-pulse 1.5s infinite;
+        }
+
+        .state-badge.invalid {
+            background: #2a0a0a;
+            border: 2px solid var(--accent-red);
+            color: var(--accent-red);
+            animation: invalid-pulse 0.8s infinite;
+        }
+
+        .state-badge.locked {
+            background: linear-gradient(90deg, #0a2a0f, #0f2a0a);
+            border: 2px solid #88ff44;
+            color: #88ff44;
+            box-shadow: 0 0 15px rgba(136, 255, 68, 0.4);
+        }
+
+        @keyframes degraded-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes invalid-pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 68, 68, 0.3); }
+            50% { opacity: 0.8; box-shadow: 0 0 20px rgba(255, 68, 68, 0.6); }
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 0.95em;
+            font-weight: bold;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        button:hover { transform: scale(1.02); }
+        button:active { transform: scale(0.98); }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+            color: #000;
+        }
+
+        .btn-stop {
+            background: var(--accent-red);
+            color: #fff;
+        }
+
+        .btn-chaos {
+            background: linear-gradient(90deg, #ff4444, #ff8800);
+            color: #fff;
+            font-size: 0.85em;
+            padding: 10px 18px;
+        }
+
+        .btn-hitl {
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            color: #fff;
+            font-size: 0.85em;
+            padding: 10px 18px;
+        }
+
+        .health-ring-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .health-ring {
+            position: relative;
+            width: 160px;
+            height: 160px;
+        }
+
+        .health-ring svg { transform: rotate(-90deg); }
+
+        .health-ring-bg {
+            fill: none;
+            stroke: var(--bg-tertiary);
+            stroke-width: 10;
+        }
+
+        .health-ring-fill {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease, stroke 0.3s;
+        }
+
+        .health-ring-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .health-ring-value {
+            font-size: 1.6em;
+            font-family: Georgia, serif;
+            color: var(--accent-green);
+        }
+
+        .health-ring-label {
+            font-size: 0.55em;
+            color: var(--text-secondary);
+        }
+
+        .channel-arcs {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .channel-arc-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.65em;
+        }
+
+        .channel-arc-bar {
+            width: 70px;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .channel-arc-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .channel-arc-name {
+            width: 30px;
+            color: var(--text-secondary);
+            font-weight: bold;
+        }
+
+        .channel-arc-value {
+            width: 40px;
+            text-align: right;
+            font-family: Georgia, serif;
+        }
+
+        .channel-health-panel {
+            background: linear-gradient(135deg, #0a0a1a, #1a0a0a);
+            border: 2px solid #ff8800;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .channel-health-panel h3 {
+            color: #ff8800;
+            font-size: 0.8em;
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .channel-item {
+            background: #0a0a12;
+            border: 2px solid var(--border-dark);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .channel-item.healthy {
+            border-color: var(--accent-green);
+            background: #0a1a0f;
+        }
+
+        .channel-item.suspect {
+            border-color: var(--accent-orange);
+            background: #1a1a0a;
+            animation: suspect-pulse 1.5s infinite;
+        }
+
+        .channel-item.blocked {
+            border-color: var(--accent-red);
+            background: #2a0a0a;
+            opacity: 0.7;
+        }
+
+        .channel-item.recovering {
+            border-color: var(--accent-blue);
+            background: #0a0a2a;
+            animation: recovering-pulse 1s infinite;
+        }
+
+        @keyframes suspect-pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 170, 0, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(255, 170, 0, 0.6); }
+        }
+
+        @keyframes recovering-pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(136, 170, 255, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(136, 170, 255, 0.6); }
+        }
+
+        .channel-name { font-size: 0.65em; color: var(--text-secondary); margin-bottom: 4px; }
+        .channel-status { font-size: 0.85em; font-weight: bold; margin-bottom: 4px; }
+        .channel-item.healthy .channel-status { color: var(--accent-green); }
+        .channel-item.suspect .channel-status { color: var(--accent-orange); }
+        .channel-item.blocked .channel-status { color: var(--accent-red); }
+        .channel-item.recovering .channel-status { color: var(--accent-blue); }
+
+        .channel-health-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            margin: 6px 0;
+            overflow: hidden;
+        }
+
+        .channel-health-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .channel-metrics { font-size: 0.55em; color: #666; }
+        .channel-recovery { font-size: 0.5em; color: var(--accent-blue); margin-top: 4px; }
+
+        .corruption-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .corrupt-btn {
+            padding: 5px 12px;
+            font-size: 0.65em;
+            border-radius: 4px;
+            border: 1px solid var(--accent-red);
+            background: #2a0a0a;
+            color: #ff6666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .corrupt-btn:hover {
+            background: #3a1a1a;
+            border-color: #ff6666;
+        }
+
+        .corrupt-btn.active {
+            background: var(--accent-red);
+            color: #000;
+        }
+
+        .corrupt-btn.clear-btn {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background: #0a1a0f;
+        }
+
+        .resilience-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-dark);
+        }
+
+        .resilience-stat {
+            text-align: center;
+            padding: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .resilience-stat-label { font-size: 0.55em; color: var(--text-secondary); }
+        .resilience-stat-value { font-size: 0.9em; color: var(--accent-green); font-family: Georgia, serif; }
+        .resilience-stat.warning .resilience-stat-value { color: var(--accent-orange); }
+        .resilience-stat.critical .resilience-stat-value { color: var(--accent-red); }
+
+        .hitl-panel {
+            background: linear-gradient(135deg, #1a0a2a, #0a1a2a);
+            border: 2px solid var(--accent-purple);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 1000px;
+            display: none;
+        }
+
+        .hitl-panel.active { display: block; }
+
+        .hitl-panel h3 {
+            color: var(--accent-purple);
+            font-size: 0.8em;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .hitl-description {
+            font-size: 0.7em;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .hitl-queue {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .hitl-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0a0a12;
+            border: 1px solid var(--border-dark);
+            border-radius: 4px;
+            padding: 10px 15px;
+        }
+
+        .hitl-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .hitl-item-channel { font-size: 0.8em; color: var(--text-primary); }
+        .hitl-item-reason { font-size: 0.6em; color: var(--text-secondary); }
+        .hitl-item-progress { font-size: 0.6em; color: var(--accent-blue); }
+
+        .hitl-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .hitl-btn {
+            padding: 5px 12px;
+            font-size: 0.65em;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .hitl-btn.approve {
+            background: var(--accent-green);
+            color: #000;
+        }
+
+        .hitl-btn.reject {
+            background: var(--accent-red);
+            color: #fff;
+        }
+
+        .odd-zeta-panel {
+            background: linear-gradient(135deg, #1a0a0a, #0a0a1a);
+            border: 2px solid #ff6666;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .odd-zeta-panel h3 {
+            color: #ff8888;
+            font-size: 0.8em;
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        .odd-zeta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .odd-zeta-item {
+            background: #0a0a12;
+            border: 1px solid #663333;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .odd-zeta-item.accelerating {
+            border-color: #ff8866;
+            box-shadow: 0 0 15px rgba(255, 102, 102, 0.3);
+        }
+
+        .odd-zeta-item.stabilized {
+            border-color: #66ff88;
+            box-shadow: 0 0 15px rgba(102, 255, 136, 0.3);
+        }
+
+        .odd-zeta-item.zeta3-special {
+            border-color: var(--accent-orange);
+            background: linear-gradient(135deg, #1a0a0a, #1a1a0a);
+        }
+
+        .odd-zeta-label { font-size: 0.65em; color: var(--text-secondary); margin-bottom: 4px; }
+        .odd-zeta-value { font-size: 1.1em; color: #ff8888; font-family: Georgia, serif; }
+        .odd-zeta-accel { font-size: 0.6em; color: #66ff66; margin-top: 4px; }
+        .odd-zeta-target { font-size: 0.55em; color: var(--text-muted); margin-top: 2px; }
+        .odd-zeta-error { font-size: 0.55em; color: #ffaa66; margin-top: 2px; }
+        .odd-zeta-stability { font-size: 0.55em; color: var(--accent-blue); margin-top: 2px; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+            gap: 10px;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 15px;
+        }
+
+        .info-cell {
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid var(--border-dark);
+            transition: all 0.3s;
+        }
+
+        .info-cell.fib { border-color: var(--accent-purple); }
+        .info-cell.luc { border-color: var(--accent-cyan); }
+        .info-cell.cat { border-color: #ffaa66; }
+        .info-cell.motz { border-color: var(--accent-blue); }
+        .info-cell.pell { border-color: #ff66aa; }
+        .info-cell.zeta { border-color: #ffff66; background: #1a1a0a; }
+        .info-cell.oddZeta { border-color: #ff6666; background: #1a0a0a; }
+        .info-cell.center { border-color: var(--accent-green); background: #0a1a0f; }
+
+        .info-cell.channel-blocked {
+            opacity: 0.4;
+            border-style: dashed;
+        }
+
+        .info-cell.channel-suspect {
+            animation: cell-suspect 0.5s infinite;
+        }
+
+        @keyframes cell-suspect {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .info-value {
+            font-size: 0.95em;
+            font-family: Georgia, serif;
+            margin-bottom: 4px;
+        }
+
+        .info-cell.fib .info-value { color: #cc88ff; }
+        .info-cell.luc .info-value { color: #88ffcc; }
+        .info-cell.cat .info-value { color: #ffcc88; }
+        .info-cell.motz .info-value { color: #88ccff; }
+        .info-cell.pell .info-value { color: #ff88cc; }
+        .info-cell.zeta .info-value { color: #ffff88; }
+        .info-cell.oddZeta .info-value { color: #ff8888; }
+        .info-cell.center .info-value { color: var(--accent-green); }
+
+        .info-label { font-size: 0.55em; color: #777; }
+        .info-target { font-size: 0.45em; color: var(--text-muted); margin-top: 2px; }
+
+        .gamma-clock {
+            background: linear-gradient(135deg, #0a0f0a, #0f0a1a, #1a0f0a, #0a0f1a);
+            border: 3px solid var(--accent-green);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gamma-clock.gamma-locked {
+            border-color: #88ff44;
+            box-shadow: 0 0 30px rgba(68, 255, 136, 0.4);
+        }
+
+        .gamma-clock.degraded-mode {
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.3);
+        }
+
+        .gamma-clock.invalid-mode {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.4);
+        }
+
+        .gamma-clock::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(68, 255, 136, 0.03), transparent);
+            animation: rotate 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate { to { transform: rotate(360deg); } }
+
+        .gamma-clock h3 {
+            font-size: 0.9em;
+            color: var(--accent-green);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            position: relative;
+        }
+
+        .time-row {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .time-block { text-align: center; }
+        .time-label { font-size: 0.65em; color: #666; margin-bottom: 4px; }
+
+        .clock-display {
+            font-size: 2.2em;
+            font-family: Georgia, serif;
+            color: var(--accent-green);
+            text-shadow: 0 0 20px rgba(68, 255, 136, 0.5);
+        }
+
+        .ramos-time {
+            font-size: 1.8em;
+            font-family: Georgia, serif;
+            color: #ff88aa;
+            text-shadow: 0 0 15px rgba(255, 136, 170, 0.4);
+        }
+
+        .time-delta { font-size: 0.75em; color: var(--text-secondary); }
+
+        .gamma-value {
+            font-size: 0.95em;
+            color: #88ffcc;
+            margin-bottom: 12px;
+            font-family: Georgia, serif;
+            position: relative;
+        }
+
+        .gamma-value.invalid {
+            color: #ff6666;
+        }
+
+        .active-channels {
+            font-size: 0.7em;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .active-channels .count { color: var(--accent-green); font-weight: bold; }
+        .active-channels .blocked { color: var(--accent-red); }
+
+        .verification-status {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .verify-item {
+            background: #0a0a12;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.6em;
+            transition: all 0.3s;
+        }
+
+        .verify-item.pass { border: 1px solid var(--accent-green); color: var(--accent-green); }
+        .verify-item.fail { border: 1px solid #ff4466; color: #ff4466; }
+        .verify-item.blocked { border: 1px solid #666; color: #666; opacity: 0.5; }
+
+        .gamma-lock-indicator {
+            margin-top: 12px;
+            padding: 10px 25px;
+            background: #0a0a12;
+            border-radius: 6px;
+            display: inline-block;
+            position: relative;
+        }
+
+        .gamma-lock-indicator.locked {
+            background: linear-gradient(90deg, #0a1a0a, #1a0a1a);
+            border: 2px solid var(--accent-green);
+            animation: lock-pulse 2s infinite;
+        }
+
+        .gamma-lock-indicator.degraded {
+            background: linear-gradient(90deg, #1a1a0a, #1a0a0a);
+            border: 2px solid var(--accent-orange);
+        }
+
+        .gamma-lock-indicator.invalid {
+            background: linear-gradient(90deg, #2a0a0a, #1a0a0a);
+            border: 2px solid var(--accent-red);
+        }
+
+        @keyframes lock-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(68, 255, 136, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(68, 255, 136, 0.6); }
+        }
+
+        .lock-text { font-size: 0.8em; color: #666; }
+        .lock-text.locked { color: var(--accent-green); font-weight: bold; }
+        .lock-text.degraded { color: var(--accent-orange); }
+        .lock-text.invalid { color: var(--accent-red); }
+
+        .convergence-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .convergence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan), #ffaa66, var(--accent-blue));
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4466, #ffaa66, var(--accent-green));
+            border-radius: 3px;
+            transition: width 0.5s;
+        }
+
+        .confidence-label {
+            font-size: 0.6em;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .audit-log {
+            width: 100%;
+            max-width: 1100px;
+            margin-bottom: 15px;
+        }
+
+        .audit-log h3 {
+            color: var(--accent-gold);
+            font-size: 0.8em;
+            margin-bottom: 10px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .scroll-container {
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid var(--border-dark);
+            border-radius: 6px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.55em;
+        }
+
+        th, td {
+            padding: 4px 6px;
+            border-bottom: 1px solid #222;
+            text-align: right;
+        }
+
+        th {
+            color: #ffaa66;
+            font-size: 0.65em;
+            position: sticky;
+            top: 0;
+            background: var(--bg-primary);
+            z-index: 1;
+        }
+
+        td:first-child { text-align: left; color: var(--accent-blue); }
+        tr.new { animation: flash 1s ease-out; }
+        tr.gamma-lock-row { background: rgba(68, 255, 136, 0.1); }
+        tr.channel-drop-row { background: rgba(255, 136, 0, 0.15); }
+        tr.invalid-row { background: rgba(255, 68, 68, 0.15); }
+
+        @keyframes flash {
+            from { background: #2a1a2a; }
+            to { background: transparent; }
+        }
+
+        .convergence { color: var(--accent-green); }
+
+        .attribution {
+            margin-top: 15px;
+            font-size: 0.6em;
+            color: #444;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .license-badge {
+            margin-top: 10px;
+            font-size: 0.55em;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .license-badge a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .license-badge a:hover { text-decoration: underline; }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.3em; }
+            .info-grid { grid-template-columns: repeat(2, 1fr); }
+            .clock-display { font-size: 1.6em; }
+            .ramos-time { font-size: 1.4em; }
+            .odd-zeta-grid { grid-template-columns: 1fr 1fr; }
+            .channel-grid { grid-template-columns: 1fr 1fr; }
+            .health-ring { width: 130px; height: 130px; }
+            .health-ring-value { font-size: 1.3em; }
+            .anchor-outputs { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>⟨ TruthAnchor v1 ⟩</h1>
+<div class="version-badge">Byzantine Fault-Tolerant Epistemic Engine</div>
+
+<div class="core-principle">
+    <blockquote>"Truth is not a vote. Truth is a limit."</blockquote>
+    <div class="subtext">Mathematical invariants define correctness. Language is an interface, not an authority.</div>
+</div>
+
+<div class="dimension-selector">
+    <button class="dim-btn d5 active" onclick="setDimension(5)">5D Base</button>
+    <button class="dim-btn d6" onclick="setDimension(6)">6D +ζ(2)</button>
+    <button class="dim-btn d7" onclick="setDimension(7)">7D +ζ(4)</button>
+    <button class="dim-btn d8" onclick="setDimension(8)">8D +ζ(6)</button>
+    <button class="dim-btn d9" onclick="setDimension(9)">9D +ODD ζ</button>
+</div>
+
+<div class="truth-anchor-panel" id="truthAnchorPanel">
+    <h3>⟨ TRUTH ANCHOR — MATHEMATICAL ROOT OF TRUST ⟩</h3>
+    <div class="anchor-outputs" id="anchorOutputs">
+        <div class="anchor-output ratio">
+            <div class="anchor-output-label">Γ* (Robust)</div>
+            <div class="anchor-output-value" id="anchorGamma">—</div>
+        </div>
+        <div class="anchor-output error">
+            <div class="anchor-output-label">Error Bound</div>
+            <div class="anchor-output-value" id="anchorError">—</div>
+        </div>
+        <div class="anchor-output quorum">
+            <div class="anchor-output-label">Quorum</div>
+            <div class="anchor-output-value" id="anchorQuorum">—</div>
+        </div>
+        <div class="anchor-output">
+            <div class="anchor-output-label">Ω Decay</div>
+            <div class="anchor-output-value" id="anchorOmega">—</div>
+        </div>
+    </div>
+    <div class="anchor-state" id="anchorState">
+        <div class="state-badge valid" id="stateBadge">VALID</div>
+    </div>
+</div>
+
+<div class="controls">
+    <button class="btn-primary" id="startBtn" onclick="start()">▶ INITIATE Γ*</button>
+    <button class="btn-stop" onclick="stop()">■ HALT</button>
+    <button class="btn-chaos" onclick="injectChaos()">⚡ INJECT CHAOS</button>
+    <button class="btn-hitl" onclick="toggleHITL()">👤 HITL REVIEW</button>
+</div>
+
+<div class="health-ring-container">
+    <div class="health-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+            <circle class="health-ring-bg" cx="80" cy="80" r="65"/>
+            <circle class="health-ring-fill" id="healthRingFill" cx="80" cy="80" r="65" 
+                    stroke="#44ff88" stroke-dasharray="408" stroke-dashoffset="0"/>
+        </svg>
+        <div class="health-ring-center">
+            <div class="health-ring-value" id="systemHealthValue">100%</div>
+            <div class="health-ring-label">SYSTEM HEALTH</div>
+        </div>
+    </div>
+    <div class="channel-arcs" id="channelArcs"></div>
+</div>
+
+<div class="channel-health-panel" id="channelHealthPanel">
+    <h3>⟨ AUDITED CHANNELS — MEDIAN-BASED ANOMALY DETECTION ⟩</h3>
+    <div class="channel-grid" id="channelGrid"></div>
+    <div class="corruption-controls" id="corruptionControls"></div>
+    <div class="resilience-stats" id="resilienceStats">
+        <div class="resilience-stat" id="activeChannelsStat">
+            <div class="resilience-stat-label">Active</div>
+            <div class="resilience-stat-value">5/5</div>
+        </div>
+        <div class="resilience-stat" id="blockedChannelsStat">
+            <div class="resilience-stat-label">Blocked</div>
+            <div class="resilience-stat-value">0</div>
+        </div>
+        <div class="resilience-stat" id="recoveryQueueStat">
+            <div class="resilience-stat-label">Recovering</div>
+            <div class="resilience-stat-value">0</div>
+        </div>
+        <div class="resilience-stat" id="medianErrorStat">
+            <div class="resilience-stat-label">Median Error</div>
+            <div class="resilience-stat-value">0%</div>
+        </div>
+        <div class="resilience-stat" id="omegaDecayStat">
+            <div class="resilience-stat-label">Ω Decay</div>
+            <div class="resilience-stat-value">0%</div>
+        </div>
+        <div class="resilience-stat" id="quorumStat">
+            <div class="resilience-stat-label">Quorum</div>
+            <div class="resilience-stat-value">✓</div>
+        </div>
+    </div>
+</div>
+
+<div class="hitl-panel" id="hitlPanel">
+    <h3>⟨ HUMAN-IN-THE-LOOP REVIEW ⟩</h3>
+    <div class="hitl-description">
+        Humans review audit trails and approve channel reinstatement.<br/>
+        <em>Humans do not correct math — they govern recovery.</em>
+    </div>
+    <div class="hitl-queue" id="hitlQueue">
+        <div style="text-align:center;color:#666;font-size:0.75em;padding:15px;">No channels pending review</div>
+    </div>
+</div>
+
+<div class="odd-zeta-panel" id="oddZetaPanel" style="display: none;">
+    <h3>⟨ ODD ZETA ACCELERATION — WYNN-ε + AITKEN Δ² ⟩</h3>
+    <div class="odd-zeta-grid" id="oddZetaGrid">
+        <div class="odd-zeta-item zeta3-special" id="zeta3Item">
+            <div class="odd-zeta-label">ζ(3) — Apéry's Constant</div>
+            <div class="odd-zeta-value" id="zeta3Value">—</div>
+            <div class="odd-zeta-accel" id="zeta3Accel">Speedup: —</div>
+            <div class="odd-zeta-target">Target: 1.2020569...</div>
+            <div class="odd-zeta-error" id="zeta3Error">Error: —</div>
+            <div class="odd-zeta-stability" id="zeta3Stability">Stability: —</div>
+        </div>
+        <div class="odd-zeta-item" id="zeta5Item">
+            <div class="odd-zeta-label">ζ(5)</div>
+            <div class="odd-zeta-value" id="zeta5Value">—</div>
+            <div class="odd-zeta-accel" id="zeta5Accel">Speedup: —</div>
+            <div class="odd-zeta-target">Target: 1.0369278...</div>
+            <div class="odd-zeta-error" id="zeta5Error">Error: —</div>
+            <div class="odd-zeta-stability" id="zeta5Stability">Stability: —</div>
+        </div>
+        <div class="odd-zeta-item" id="zeta7Item">
+            <div class="odd-zeta-label">ζ(7)</div>
+            <div class="odd-zeta-value" id="zeta7Value">—</div>
+            <div class="odd-zeta-accel" id="zeta7Accel">Speedup: —</div>
+            <div class="odd-zeta-target">Target: 1.0083493...</div>
+            <div class="odd-zeta-error" id="zeta7Error">Error: —</div>
+            <div class="odd-zeta-stability" id="zeta7Stability">Stability: —</div>
+        </div>
+        <div class="odd-zeta-item" id="zeta9Item">
+            <div class="odd-zeta-label">ζ(9)</div>
+            <div class="odd-zeta-value" id="zeta9Value">—</div>
+            <div class="odd-zeta-accel" id="zeta9Accel">Speedup: —</div>
+            <div class="odd-zeta-target">Target: 1.0020084...</div>
+            <div class="odd-zeta-error" id="zeta9Error">Error: —</div>
+            <div class="odd-zeta-stability" id="zeta9Stability">Stability: —</div>
+        </div>
+    </div>
+</div>
+
+<div class="info-grid" id="infoGrid"></div>
+
+<div class="gamma-clock" id="gammaClock">
+    <h3 id="clockTitle">⟨ 5D SELF-VERIFIED TIME ⟩</h3>
+    <div class="time-row">
+        <div class="time-block">
+            <div class="time-label">NEWTONIAN TIME (n)</div>
+            <div class="clock-display" id="clockDisplay">n = 0</div>
+        </div>
+        <div class="time-block">
+            <div class="time-label" id="ramosLabel">RAMOS TIME (Rt₅)</div>
+            <div class="ramos-time" id="ramosTimeDisplay">Rt₅ = 0</div>
+            <div class="time-delta" id="timeDelta">Δ = 0</div>
+        </div>
+    </div>
+    <div class="active-channels" id="activeChannelsDisplay">
+        Active: <span class="count">5/5</span> channels | Blocked: <span class="blocked">0</span>
+    </div>
+    <div class="gamma-value" id="gammaMetrics">
+        Γ* = <span id="gammaDisplay">—</span> | 
+        Ψ = <span id="psiDisplay">—</span> |
+        Ω = <span id="omegaDisplay">—</span>
+    </div>
+    <div class="verification-status" id="verificationStatus"></div>
+    <div class="gamma-lock-indicator" id="gammaLockIndicator">
+        <span class="lock-text" id="lockText">AWAITING GAMMA LOCK</span>
+    </div>
+    <div class="convergence-bar"><div class="convergence-fill" id="convergenceFill" style="width: 0%"></div></div>
+    <div class="confidence-bar"><div class="confidence-fill" id="confidenceFill"></div></div>
+    <div class="confidence-label" id="confidenceLabel">Lock Confidence: 0%</div>
+</div>
+
+<div class="audit-log">
+    <h3>⟨ AUDIT TRAIL ⟩</h3>
+    <div class="scroll-container">
+        <table>
+            <thead id="tableHead">
+                <tr><th>n</th><th>F→φ</th><th>L→φ</th><th>C→4</th><th>M→3</th><th>P→δₛ</th><th>Γ*</th><th>Rt</th><th>H%</th><th>State</th></tr>
+            </thead>
+            <tbody id="log"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="attribution">
+    TruthAnchor v1 — Mathematical Root-of-Trust Architecture<br/>
+    Γ* = Robust Γ (active channels only) | Ω decays when channels drop<br/>
+    Loss of quorum ⇒ INVALID state, not guessing<br/>
+    ❤️ 🇺🇸 × 🇧🇪 ❤️
+</div>
+
+<div class="license-badge">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 1.0 Universal — Public Domain</a>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// MATHEMATICAL CONSTANTS — THE IMMUTABLE TRUTH
+// ═══════════════════════════════════════════════════════════════
+
+const PHI = (1 + Math.sqrt(5)) / 2;
+const SILVER_RATIO = 1 + Math.sqrt(2);
+const PI = Math.PI;
+
+const ZETA_EVEN = {
+    2: (PI * PI) / 6,
+    4: (PI ** 4) / 90,
+    6: (PI ** 6) / 945
+};
+
+const ZETA_ODD_TARGETS = {
+    3: 1.2020569031595942853997381615114499907649862923405,
+    5: 1.0369277551433699263313654864570341680570809195019,
+    7: 1.0083492773819228268397975498497967595998635605652,
+    9: 1.0020083928260822144178527692324120604856058513949
+};
+
+const ZETA_CONFIG = {
+    3: { historySize: 25, emaAlpha: 0.08, dampingFactor: 2.5, useWynn: true },
+    5: { historySize: 15, emaAlpha: 0.12, dampingFactor: 1.5, useWynn: false },
+    7: { historySize: 12, emaAlpha: 0.15, dampingFactor: 1.2, useWynn: false },
+    9: { historySize: 10, emaAlpha: 0.18, dampingFactor: 1.0, useWynn: false }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// CHANNEL GOVERNANCE CONFIG — BYZANTINE FAULT TOLERANCE
+// ═══════════════════════════════════════════════════════════════
+
+const CHANNEL_CONFIG = {
+    healthDecay: 0.06,
+    healthRecover: 0.015,
+    blockThreshold: 0.25,
+    suspectThreshold: 0.6,
+    recoverySteps: 25,
+    recoveryHealthStart: 0.55,
+    anomalyMultiplier: 2.5,
+    minActiveRatio: 0.6,
+    corruptionNoiseRange: 2.0,
+    omegaDecayPerBlock: 0.15
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+
+let channelHealth = {};
+let channelStableCount = {};
+let channelBlocked = {};
+let channelCorruption = {};
+let channelErrors = {};
+let channelBlockReason = {};
+let omegaDecayFactor = 1.0;
+let hitlPendingReview = [];
+let hitlPanelVisible = false;
+
+let currentDimension = 5;
+let running = false;
+let n = 2;
+
+let fPrevPrev = 1n, fPrev = 1n, fCurr = 2n;
+let lPrevPrev = 1n, lPrev = 3n, lCurr = 4n;
+let cPrev = 1n, cCurr = 1n;
+let motzkinMemo = [1n, 1n, 2n, 4n, 9n, 21n];
+let mPrevPrev = 4n, mPrev = 9n, mCurr = 21n;
+let pPrevPrev = 1n, pPrev = 2n, pCurr = 5n;
+
+let zetaSums = { 2: 0, 4: 0, 6: 0 };
+let oddZetaSums = { 3: 0, 5: 0, 7: 0, 9: 0 };
+let oddZetaAccelerated = { 3: 0, 5: 0, 7: 0, 9: 0 };
+let oddZetaHistory = { 3: [], 5: [], 7: [], 9: [] };
+let oddZetaEMA = { 3: 0, 5: 0, 7: 0, 9: 0 };
+let oddZetaStability = { 3: 0, 5: 0, 7: 0, 9: 0 };
+
+let emaGamma = 1.0;
+const EMA_ALPHA = 0.15;
+let lockStability = 0;
+let gammaHistory = [];
+let gammaLocked = false;
+let gammaInvalid = false;
+let systemState = 'VALID';
+
+// ═══════════════════════════════════════════════════════════════
+// DIMENSION CONFIGURATION
+// ═══════════════════════════════════════════════════════════════
+
+const DIMENSION_CONFIG = {
+    5: { name: 'Pentadimensional', sequences: ['fib', 'luc', 'cat', 'motz', 'pell'],
+         targets: { fib: PHI, luc: PHI, cat: 4, motz: 3, pell: SILVER_RATIO },
+         delta: 0.375, symbol: 'Γ*₅', rtSymbol: 'Rt₅' },
+    6: { name: 'Hexadimensional', sequences: ['fib', 'luc', 'cat', 'motz', 'pell', 'zeta2'],
+         targets: { fib: PHI, luc: PHI, cat: 4, motz: 3, pell: SILVER_RATIO, zeta2: ZETA_EVEN[2] },
+         delta: 0.1875, symbol: 'Γ*₆', rtSymbol: 'Rt₆' },
+    7: { name: 'Heptadimensional', sequences: ['fib', 'luc', 'cat', 'motz', 'pell', 'zeta2', 'zeta4'],
+         targets: { fib: PHI, luc: PHI, cat: 4, motz: 3, pell: SILVER_RATIO, zeta2: ZETA_EVEN[2], zeta4: ZETA_EVEN[4] },
+         delta: 0.09375, symbol: 'Γ*₇', rtSymbol: 'Rt₇' },
+    8: { name: 'Octadimensional', sequences: ['fib', 'luc', 'cat', 'motz', 'pell', 'zeta2', 'zeta4', 'zeta6'],
+         targets: { fib: PHI, luc: PHI, cat: 4, motz: 3, pell: SILVER_RATIO, zeta2: ZETA_EVEN[2], zeta4: ZETA_EVEN[4], zeta6: ZETA_EVEN[6] },
+         delta: 0.046875, symbol: 'Γ*₈', rtSymbol: 'Rt₈' },
+    9: { name: 'Nonadimensional + Odd ζ', sequences: ['fib', 'luc', 'cat', 'motz', 'pell', 'zeta2', 'zeta4', 'zeta6', 'oddZeta'],
+         targets: { fib: PHI, luc: PHI, cat: 4, motz: 3, pell: SILVER_RATIO, zeta2: ZETA_EVEN[2], zeta4: ZETA_EVEN[4], zeta6: ZETA_EVEN[6], oddZeta: 1.0 },
+         delta: 0.0234375, symbol: 'Γ*₉', rtSymbol: 'Rt₉', oddZetaMode: true }
+};
+
+const SEQ_INFO = {
+    fib: { label: 'Fibonacci', symbol: 'F→φ', color: '#aa66ff', targetStr: 'φ' },
+    luc: { label: 'Lucas', symbol: 'L→φ', color: '#66ffaa', targetStr: 'φ' },
+    cat: { label: 'Catalan', symbol: 'C→4', color: '#ffaa66', targetStr: '4' },
+    motz: { label: 'Motzkin', symbol: 'M→3', color: '#66aaff', targetStr: '3' },
+    pell: { label: 'Pell', symbol: 'P→δₛ', color: '#ff66aa', targetStr: 'δₛ' },
+    zeta2: { label: 'ζ(2)', symbol: 'ζ₂', color: '#ffff66', targetStr: 'π²/6' },
+    zeta4: { label: 'ζ(4)', symbol: 'ζ₄', color: '#ff88ff', targetStr: 'π⁴/90' },
+    zeta6: { label: 'ζ(6)', symbol: 'ζ₆', color: '#88ffff', targetStr: 'π⁶/945' },
+    oddZeta: { label: 'Odd ζ', symbol: 'ζ_odd', color: '#ff6666', targetStr: '→1.0' }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// CHANNEL HEALTH SYSTEM
+// ═══════════════════════════════════════════════════════════════
+
+function initChannelState(sequences) {
+    channelHealth = {};
+    channelStableCount = {};
+    channelBlocked = {};
+    channelCorruption = {};
+    channelErrors = {};
+    channelBlockReason = {};
+    omegaDecayFactor = 1.0;
+    hitlPendingReview = [];
+    
+    sequences.forEach(seq => {
+        channelHealth[seq] = 1.0;
+        channelStableCount[seq] = 0;
+        channelBlocked[seq] = false;
+        channelCorruption[seq] = false;
+        channelErrors[seq] = 0;
+        channelBlockReason[seq] = '';
+    });
+    
+    updateHITLPanel();
+}
+
+function simulateCorruption(seq, value) {
+    if (channelCorruption[seq]) {
+        const noise = 0.5 + Math.random() * CHANNEL_CONFIG.corruptionNoiseRange;
+        return value * noise;
+    }
+    return value;
+}
+
+function getMedianError(sequences) {
+    const errors = sequences
+        .filter(seq => !channelBlocked[seq] && channelErrors[seq] !== undefined)
+        .map(seq => channelErrors[seq])
+        .sort((a, b) => a - b);
+    
+    if (errors.length === 0) return 0;
+    const mid = Math.floor(errors.length / 2);
+    return errors.length % 2 ? errors[mid] : (errors[mid - 1] + errors[mid]) / 2;
+}
+
+function isAnomaly(seq, sequences) {
+    const median = getMedianError(sequences);
+    const error = channelErrors[seq] || 0;
+    return error > CHANNEL_CONFIG.anomalyMultiplier * Math.max(median, 0.01);
+}
+
+function updateChannelHealth(seq, passed, sequences) {
+    if (channelBlocked[seq]) {
+        if (!channelCorruption[seq] && passed && !isAnomaly(seq, sequences)) {
+            channelStableCount[seq]++;
+            
+            if (!hitlPendingReview.find(item => item.seq === seq)) {
+                const progress = channelStableCount[seq] / CHANNEL_CONFIG.recoverySteps;
+                if (progress >= 0.5) {
+                    hitlPendingReview.push({
+                        seq: seq,
+                        reason: channelBlockReason[seq],
+                        progress: channelStableCount[seq],
+                        required: CHANNEL_CONFIG.recoverySteps
+                    });
+                    updateHITLPanel();
+                }
+            }
+        } else {
+            channelStableCount[seq] = Math.max(0, channelStableCount[seq] - 1);
+        }
+        return;
+    }
+    
+    if (passed && !isAnomaly(seq, sequences)) {
+        channelHealth[seq] = Math.min(1, channelHealth[seq] + CHANNEL_CONFIG.healthRecover);
+        channelStableCount[seq]++;
+    } else {
+        channelHealth[seq] = Math.max(0, channelHealth[seq] - CHANNEL_CONFIG.healthDecay);
+        channelStableCount[seq] = 0;
+    }
+    
+    if (channelHealth[seq] < CHANNEL_CONFIG.blockThreshold) {
+        channelBlocked[seq] = true;
+        channelStableCount[seq] = 0;
+        channelBlockReason[seq] = isAnomaly(seq, sequences) ? 'Anomaly detected' : 'Health threshold breach';
+    }
+}
+
+function approveRecovery(seq) {
+    if (channelBlocked[seq] && channelStableCount[seq] >= CHANNEL_CONFIG.recoverySteps * 0.5) {
+        channelBlocked[seq] = false;
+        channelHealth[seq] = CHANNEL_CONFIG.recoveryHealthStart;
+        channelStableCount[seq] = 0;
+        channelBlockReason[seq] = '';
+        
+        hitlPendingReview = hitlPendingReview.filter(item => item.seq !== seq);
+        updateHITLPanel();
+    }
+}
+
+function rejectRecovery(seq) {
+    channelStableCount[seq] = 0;
+    hitlPendingReview = hitlPendingReview.filter(item => item.seq !== seq);
+    updateHITLPanel();
+}
+
+function getChannelStatus(seq) {
+    if (channelBlocked[seq]) {
+        return channelStableCount[seq] > 0 ? 'recovering' : 'blocked';
+    }
+    if (channelHealth[seq] < CHANNEL_CONFIG.suspectThreshold) {
+        return 'suspect';
+    }
+    return 'healthy';
+}
+
+function getActiveChannels(sequences) {
+    return sequences.filter(seq => !channelBlocked[seq]);
+}
+
+function hasQuorum(sequences) {
+    const active = getActiveChannels(sequences);
+    const required = Math.ceil(sequences.length * CHANNEL_CONFIG.minActiveRatio);
+    return active.length >= required;
+}
+
+function computeOmegaDecay(sequences) {
+    const blocked = sequences.filter(seq => channelBlocked[seq]).length;
+    omegaDecayFactor = Math.pow(1 - CHANNEL_CONFIG.omegaDecayPerBlock, blocked);
+    return omegaDecayFactor;
+}
+
+function getSystemHealth(sequences) {
+    const total = sequences.length;
+    if (total === 0) return 1;
+    const healthSum = sequences.reduce((sum, seq) => sum + (channelBlocked[seq] ? 0 : channelHealth[seq]), 0);
+    return healthSum / total;
+}
+
+function determineSystemState(sequences, gammaValid, gammaLock) {
+    if (!hasQuorum(sequences)) return 'INVALID';
+    if (gammaLock) return 'LOCKED';
+    const blocked = sequences.filter(s => channelBlocked[s]).length;
+    if (blocked > 0) return 'DEGRADED';
+    return 'VALID';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CORRUPTION & CHAOS INJECTION
+// ═══════════════════════════════════════════════════════════════
+
+function toggleCorruption(seq) {
+    channelCorruption[seq] = !channelCorruption[seq];
+    if (!channelCorruption[seq] && channelBlocked[seq]) {
+        channelStableCount[seq] = 0;
+    }
+    updateCorruptionControls();
+}
+
+function injectChaos() {
+    const config = DIMENSION_CONFIG[currentDimension];
+    const sequences = config.sequences.filter(s => s !== 'oddZeta');
+    const numToCorrupt = 1 + Math.floor(Math.random() * 2);
+    const shuffled = [...sequences].sort(() => Math.random() - 0.5);
+    
+    for (let i = 0; i < numToCorrupt && i < shuffled.length; i++) {
+        if (!channelCorruption[shuffled[i]]) {
+            channelCorruption[shuffled[i]] = true;
+        }
+    }
+    updateCorruptionControls();
+}
+
+function clearAllCorruption() {
+    const config = DIMENSION_CONFIG[currentDimension];
+    config.sequences.forEach(seq => {
+        channelCorruption[seq] = false;
+    });
+    updateCorruptionControls();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UI BUILDERS
+// ═══════════════════════════════════════════════════════════════
+
+function buildChannelHealthPanel() {
+    const config = DIMENSION_CONFIG[currentDimension];
+    const sequences = config.sequences.filter(s => s !== 'oddZeta');
+    
+    const grid = document.getElementById('channelGrid');
+    grid.innerHTML = sequences.map(seq => {
+        const info = SEQ_INFO[seq];
+        return `
+            <div class="channel-item healthy" id="channel-${seq}">
+                <div class="channel-name">${info.label}</div>
+                <div class="channel-status" id="channel-status-${seq}">● HEALTHY</div>
+                <div class="channel-health-bar">
+                    <div class="channel-health-fill" id="channel-health-fill-${seq}" style="width:100%;background:#44ff88;"></div>
+                </div>
+                <div class="channel-metrics" id="channel-metrics-${seq}">H: 100% | E: 0%</div>
+                <div class="channel-recovery" id="channel-recovery-${seq}"></div>
+            </div>
+        `;
+    }).join('');
+    
+    buildChannelArcs(sequences);
+    updateCorruptionControls();
+}
+
+function buildChannelArcs(sequences) {
+    const container = document.getElementById('channelArcs');
+    container.innerHTML = sequences.map(seq => {
+        const info = SEQ_INFO[seq];
+        return `
+            <div class="channel-arc-item">
+                <span class="channel-arc-name">${info.symbol.split('→')[0]}</span>
+                <div class="channel-arc-bar">
+                    <div class="channel-arc-fill" id="arc-${seq}" style="width:100%;background:${info.color};"></div>
+                </div>
+                <span class="channel-arc-value" id="arc-val-${seq}" style="color:${info.color}">100</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateCorruptionControls() {
+    const config = DIMENSION_CONFIG[currentDimension];
+    const sequences = config.sequences.filter(s => s !== 'oddZeta');
+    
+    const controls = document.getElementById('corruptionControls');
+    let html = sequences.map(seq => {
+        const info = SEQ_INFO[seq];
+        const isCorrupt = channelCorruption[seq];
+        return `<button class="corrupt-btn ${isCorrupt ? 'active' : ''}" onclick="toggleCorruption('${seq}')">${isCorrupt ? '✗' : '⚡'} ${info.symbol.split('→')[0]}</button>`;
+    }).join('');
+    html += `<button class="corrupt-btn clear-btn" onclick="clearAllCorruption()">↻ CLEAR ALL</button>`;
+    controls.innerHTML = html;
+}
+
+function toggleHITL() {
+    hitlPanelVisible = !hitlPanelVisible;
+    document.getElementById('hitlPanel').classList.toggle('active', hitlPanelVisible);
+}
+
+function updateHITLPanel() {
+    const queue = document.getElementById('hitlQueue');
+    
+    if (hitlPendingReview.length === 0) {
+        queue.innerHTML = '<div style="text-align:center;color:#666;font-size:0.75em;padding:15px;">No channels pending review</div>';
+        return;
+    }
+    
+    queue.innerHTML = hitlPendingReview.map(item => {
+        const info = SEQ_INFO[item.seq];
+        const progress = ((item.progress / item.required) * 100).toFixed(0);
+        return `
+            <div class="hitl-item">
+                <div class="hitl-item-info">
+                    <div class="hitl-item-channel">${info.label} (${info.symbol})</div>
+                    <div class="hitl-item-reason">Blocked: ${item.reason}</div>
+                    <div class="hitl-item-progress">Recovery: ${progress}% (${item.progress}/${item.required} stable steps)</div>
+                </div>
+                <div class="hitl-actions">
+                    <button class="hitl-btn approve" onclick="approveRecovery('${item.seq}')">✓ Approve</button>
+                    <button class="hitl-btn reject" onclick="rejectRecovery('${item.seq}')">✗ Reject</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateChannelDisplay(seq, status, health, error) {
+    const item = document.getElementById(`channel-${seq}`);
+    if (!item) return;
+    
+    const statusEl = document.getElementById(`channel-status-${seq}`);
+    const metricsEl = document.getElementById(`channel-metrics-${seq}`);
+    const healthFill = document.getElementById(`channel-health-fill-${seq}`);
+    const recoveryEl = document.getElementById(`channel-recovery-${seq}`);
+    const arcFill = document.getElementById(`arc-${seq}`);
+    const arcVal = document.getElementById(`arc-val-${seq}`);
+    
+    item.className = `channel-item ${status}`;
+    
+    const statusSymbols = {
+        healthy: '● HEALTHY',
+        suspect: '⚠ SUSPECT',
+        blocked: '✗ BLOCKED',
+        recovering: '↻ RECOVERING'
+    };
+    
+    statusEl.textContent = statusSymbols[status] || '? UNKNOWN';
+    metricsEl.textContent = `H: ${(health * 100).toFixed(0)}% | E: ${(error * 100).toFixed(1)}%`;
+    
+    const healthColor = health > 0.7 ? '#44ff88' : health > 0.4 ? '#ffaa00' : '#ff4444';
+    healthFill.style.width = `${health * 100}%`;
+    healthFill.style.background = healthColor;
+    
+    if (arcFill && arcVal) {
+        arcFill.style.width = `${health * 100}%`;
+        arcFill.style.background = healthColor;
+        arcVal.textContent = (health * 100).toFixed(0);
+        arcVal.style.color = healthColor;
+    }
+    
+    if (status === 'recovering') {
+        const progress = (channelStableCount[seq] / CHANNEL_CONFIG.recoverySteps * 100).toFixed(0);
+        recoveryEl.textContent = `Recovery: ${progress}% — Pending HITL review`;
+    } else if (status === 'blocked') {
+        recoveryEl.textContent = `Stable: ${channelStableCount[seq]}/${CHANNEL_CONFIG.recoverySteps}`;
+    } else {
+        recoveryEl.textContent = '';
+    }
+}
+
+function updateHealthRing(systemHealth) {
+    const fill = document.getElementById('healthRingFill');
+    const value = document.getElementById('systemHealthValue');
+    
+    const circumference = 2 * Math.PI * 65;
+    const offset = circumference * (1 - systemHealth);
+    
+    fill.style.strokeDashoffset = offset;
+    
+    const color = systemHealth > 0.7 ? '#44ff88' : systemHealth > 0.4 ? '#ffaa00' : '#ff4444';
+    fill.style.stroke = color;
+    
+    value.textContent = `${(systemHealth * 100).toFixed(0)}%`;
+    value.style.color = color;
+}
+
+function updateResilienceStats(sequences) {
+    const active = getActiveChannels(sequences);
+    const blocked = sequences.filter(s => channelBlocked[s]);
+    const recovering = sequences.filter(s => getChannelStatus(s) === 'recovering');
+    const total = sequences.length;
+    
+    const median = getMedianError(sequences);
+    const quorumMet = hasQuorum(sequences);
+    const omegaDecay = (1 - omegaDecayFactor) * 100;
+    
+    document.querySelector('#activeChannelsStat .resilience-stat-value').textContent = `${active.length}/${total}`;
+    document.querySelector('#blockedChannelsStat .resilience-stat-value').textContent = blocked.length;
+    document.querySelector('#recoveryQueueStat .resilience-stat-value').textContent = recovering.length;
+    document.querySelector('#medianErrorStat .resilience-stat-value').textContent = `${(median * 100).toFixed(1)}%`;
+    document.querySelector('#omegaDecayStat .resilience-stat-value').textContent = `${omegaDecay.toFixed(0)}%`;
+    
+    const quorumEl = document.querySelector('#quorumStat .resilience-stat-value');
+    quorumEl.textContent = quorumMet ? '✓' : '✗';
+    quorumEl.style.color = quorumMet ? '#44ff88' : '#ff4444';
+    
+    document.getElementById('blockedChannelsStat').className = 'resilience-stat' + (blocked.length > 0 ? ' warning' : '');
+    document.getElementById('omegaDecayStat').className = 'resilience-stat' + (omegaDecay > 30 ? ' critical' : omegaDecay > 0 ? ' warning' : '');
+}
+
+function updateTruthAnchorPanel(gamma, error, quorum, omegaDecay, state) {
+    document.getElementById('anchorGamma').textContent = state === 'INVALID' ? '—' : gamma.toFixed(8);
+    document.getElementById('anchorError').textContent = error.toExponential(2);
+    document.getElementById('anchorQuorum').textContent = quorum ? '✓ MET' : '✗ LOST';
+    document.getElementById('anchorOmega').textContent = `${(omegaDecay * 100).toFixed(0)}%`;
+    
+    const badge = document.getElementById('stateBadge');
+    badge.className = 'state-badge ' + state.toLowerCase();
+    badge.textContent = state;
+}
+
+function buildInfoGrid() {
+    const config = DIMENSION_CONFIG[currentDimension];
+    const grid = document.getElementById('infoGrid');
+    
+    let html = config.sequences.map(seq => {
+        const info = SEQ_INFO[seq];
+        const cellClass = seq.startsWith('zeta') ? 'zeta' : (seq === 'oddZeta' ? 'oddZeta' : seq);
+        return `<div class="info-cell ${cellClass}" id="cell-${seq}"><div class="info-value" id="${seq}Ratio">—</div><div class="info-label">${info.label}</div><div class="info-target">→ ${info.targetStr}</div></div>`;
+    }).join('');
+    html += `<div class="info-cell center"><div class="info-value" id="gammaValue">—</div><div class="info-label">${config.symbol}</div><div class="info-target">→ 1.0</div></div>`;
+    grid.innerHTML = html;
+}
+
+function buildVerificationStatus() {
+    const config = DIMENSION_CONFIG[currentDimension];
+    let html = config.sequences.map(seq => 
+        `<div class="verify-item" id="v${seq}">${SEQ_INFO[seq].symbol}: ○</div>`
+    ).join('');
+    html += `<div class="verify-item" id="vGamma">${config.symbol}: ○</div>`;
+    document.getElementById('verificationStatus').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SEQUENCE GENERATORS
+// ═══════════════════════════════════════════════════════════════
+
+function fibStep() { const next = fPrev + fCurr; fPrevPrev = fPrev; fPrev = fCurr; fCurr = next; }
+function lucStep() { const next = lPrev + lCurr; lPrevPrev = lPrev; lPrev = lCurr; lCurr = next; }
+function catStep() { const num = cCurr * BigInt(2 * (2 * n + 1)); const den = BigInt(n + 2); cPrev = cCurr; cCurr = num / den; }
+function motzkinStep() {
+    const nBig = BigInt(n);
+    const num = (2n * nBig + 1n) * mCurr + (3n * nBig - 3n) * mPrev;
+    const next = num / (nBig + 2n);
+    motzkinMemo.push(next);
+    if (motzkinMemo.length > 100) motzkinMemo = motzkinMemo.slice(-50);
+    mPrevPrev = mPrev; mPrev = mCurr; mCurr = next;
+}
+function pellStep() { const next = 2n * pCurr + pPrev; pPrevPrev = pPrev; pPrev = pCurr; pCurr = next; }
+function zetaStep() { const k = n + 1; zetaSums[2] += 1/(k*k); zetaSums[4] += 1/Math.pow(k,4); zetaSums[6] += 1/Math.pow(k,6); }
+
+function oddZetaStep() {
+    const k = n + 1;
+    [3, 5, 7, 9].forEach(s => {
+        oddZetaSums[s] += 1 / Math.pow(k, s);
+        const config = ZETA_CONFIG[s];
+        oddZetaHistory[s].push(oddZetaSums[s]);
+        if (oddZetaHistory[s].length > config.historySize) oddZetaHistory[s].shift();
+        oddZetaEMA[s] = config.emaAlpha * oddZetaSums[s] + (1 - config.emaAlpha) * oddZetaEMA[s];
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ACCELERATION ALGORITHMS
+// ═══════════════════════════════════════════════════════════════
+
+function wynnEpsilon(history) {
+    if (history.length < 5) return history[history.length - 1] || 0;
+    const len = history.length;
+    const eps = [];
+    for (let i = 0; i < len; i++) eps[i] = [0, history[i]];
+    for (let k = 2; k <= Math.min(6, len); k++) {
+        for (let i = 0; i < len - k + 1; i++) {
+            const diff = eps[i + 1][k - 1] - eps[i][k - 1];
+            eps[i][k] = Math.abs(diff) < 1e-20 ? eps[i][k - 1] : eps[i + 1][k - 2] + 1 / diff;
+        }
+    }
+    const lastRow = eps[0];
+    for (let k = lastRow.length - 1; k >= 0; k--) {
+        if (k % 2 === 1 && isFinite(lastRow[k]) && lastRow[k] > 1 && lastRow[k] < 2) return lastRow[k];
+    }
+    return history[len - 1];
+}
+
+function aitkenAccelerate(history) {
+    if (history.length < 3) return history[history.length - 1] || 0;
+    const len = history.length;
+    const s0 = history[len - 3], s1 = history[len - 2], s2 = history[len - 1];
+    const denom = s2 - 2 * s1 + s0;
+    if (Math.abs(denom) < 1e-20) return s2;
+    const acc = s2 - ((s2 - s1) ** 2) / denom;
+    return isFinite(acc) && acc > 1 && acc < 2 ? acc : s2;
+}
+
+function iteratedAitken(history, iterations = 2) {
+    let current = [...history];
+    for (let iter = 0; iter < iterations && current.length >= 3; iter++) {
+        const next = [];
+        for (let i = 0; i <= current.length - 3; i++) {
+            const s0 = current[i], s1 = current[i + 1], s2 = current[i + 2];
+            const denom = s2 - 2 * s1 + s0;
+            if (Math.abs(denom) > 1e-20) {
+                const acc = s2 - ((s2 - s1) ** 2) / denom;
+                if (isFinite(acc)) next.push(acc);
+            }
+        }
+        if (next.length < 3) break;
+        current = next;
+    }
+    return current.length > 0 ? current[current.length - 1] : history[history.length - 1];
+}
+
+function constantLockedAcceleration(s, partialSum, fibRatio, pellRatio, gamma) {
+    const target = ZETA_ODD_TARGETS[s];
+    const config = ZETA_CONFIG[s];
+    const history = oddZetaHistory[s];
+    const ema = oddZetaEMA[s];
+    if (history.length < 5) return partialSum;
+    
+    let accelerated;
+    if (s === 3) {
+        const wynn = wynnEpsilon(history);
+        const itAitken = iteratedAitken(history, 3);
+        const recentVariance = history.slice(-5).reduce((sum, v, i, arr) => i === 0 ? 0 : sum + Math.abs(v - arr[i-1]), 0) / 4;
+        const stabilityFactor = 1 / (1 + recentVariance * 1000);
+        oddZetaStability[3] = stabilityFactor;
+        const blended = wynn * stabilityFactor + itAitken * (1 - stabilityFactor);
+        const dampedEMA = config.emaAlpha * 0.5 * blended + (1 - config.emaAlpha * 0.5) * ema;
+        const lockStrength = (1 - Math.abs(fibRatio - PHI) / PHI) * (1 - Math.abs(pellRatio - SILVER_RATIO) / SILVER_RATIO);
+        const gammaBonus = gamma > 0.995 && gamma < 1.005 ? 0.15 : 0;
+        accelerated = dampedEMA + (target - dampedEMA) * lockStrength * (0.15 + gammaBonus);
+    } else {
+        const aitken = aitkenAccelerate(history);
+        const blended = config.emaAlpha * aitken + (1 - config.emaAlpha) * ema;
+        const lockStrength = (1 - Math.abs(fibRatio - PHI) / PHI) * (1 - Math.abs(pellRatio - SILVER_RATIO) / SILVER_RATIO);
+        const gammaBonus = gamma > 0.99 && gamma < 1.01 ? 0.4 : 0;
+        accelerated = blended + (target - blended) * lockStrength * (0.3 + gammaBonus) / config.dampingFactor;
+        const recentVariance = history.slice(-3).reduce((sum, v, i, arr) => i === 0 ? 0 : sum + Math.abs(v - arr[i-1]), 0) / 2;
+        oddZetaStability[s] = 1 / (1 + recentVariance * 1000);
+    }
+    return Math.max(1, Math.min(target * 1.05, accelerated));
+}
+
+function preciseRatio(a, b) {
+    if (b === 0n) return 1;
+    const sa = a.toString(), sb = b.toString();
+    const precision = Math.min(15, Math.min(sa.length, sb.length));
+    const aVal = Number(sa.slice(0, precision));
+    const bVal = Number(sb.slice(0, precision));
+    return (aVal / bVal) * Math.pow(10, sa.length - sb.length);
+}
+
+function acceleratedMotzkinRatio(motzR) {
+    if (motzkinMemo.length < 4) return motzR;
+    const len = motzkinMemo.length;
+    const r1 = Number(motzkinMemo[len-1]) / Number(motzkinMemo[len-2]);
+    const r2 = Number(motzkinMemo[len-2]) / Number(motzkinMemo[len-3]);
+    const r3 = Number(motzkinMemo[len-3]) / Number(motzkinMemo[len-4]);
+    const denom = r1 - 2*r2 + r3;
+    if (Math.abs(denom) < 1e-15) return motzR;
+    const acc = r1 - ((r1 - r2) ** 2) / denom;
+    return (acc > 0 && acc < 10 && !isNaN(acc)) ? acc : motzR;
+}
+
+function getTolerance(n) {
+    const base = Math.max(1, Math.log10(n));
+    return { fib: 1e-8/base, luc: 1e-8/base, cat: 0.01/(base*0.5), motz: 0.05/(base*0.4), pell: 1e-8/base,
+             zeta2: 0.001/base, zeta4: 0.0005/base, zeta6: 0.0002/base, oddZeta: 0.01/base, gamma: 0.01/base };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DIMENSION MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+
+function setDimension(dim) {
+    currentDimension = dim;
+    document.querySelectorAll('.dim-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.dim-btn.d${dim}`).classList.add('active');
+    
+    const config = DIMENSION_CONFIG[dim];
+    
+    document.getElementById('oddZetaPanel').style.display = config.oddZetaMode ? 'block' : 'none';
+    
+    const seqNames = config.sequences.map(s => SEQ_INFO[s].label).join(' • ');
+    
+    document.getElementById('clockTitle').textContent = `⟨ ${dim}D SELF-VERIFIED TIME ⟩`;
+    document.getElementById('ramosLabel').textContent = `RAMOS TIME (${config.rtSymbol})`;
+    
+    initChannelState(config.sequences);
+    buildInfoGrid();
+    buildVerificationStatus();
+    buildChannelHealthPanel();
+    resetState();
+}
+
+function resetState() {
+    n = 5;
+    fPrevPrev = 3n; fPrev = 5n; fCurr = 8n;
+    lPrevPrev = 4n; lPrev = 7n; lCurr = 11n;
+    cPrev = 5n; cCurr = 14n;
+    motzkinMemo = [1n, 1n, 2n, 4n, 9n, 21n];
+    mPrevPrev = 4n; mPrev = 9n; mCurr = 21n;
+    pPrevPrev = 5n; pPrev = 12n; pCurr = 29n;
+    
+    zetaSums = { 2: 0, 4: 0, 6: 0 };
+    for (let k = 1; k <= 5; k++) {
+        zetaSums[2] += 1 / (k * k);
+        zetaSums[4] += 1 / Math.pow(k, 4);
+        zetaSums[6] += 1 / Math.pow(k, 6);
+    }
+    
+    oddZetaSums = { 3: 0, 5: 0, 7: 0, 9: 0 };
+    oddZetaAccelerated = { 3: 0, 5: 0, 7: 0, 9: 0 };
+    oddZetaHistory = { 3: [], 5: [], 7: [], 9: [] };
+    oddZetaEMA = { 3: 0, 5: 0, 7: 0, 9: 0 };
+    oddZetaStability = { 3: 0, 5: 0, 7: 0, 9: 0 };
+    
+    for (let k = 1; k <= 5; k++) {
+        oddZetaSums[3] += 1 / Math.pow(k, 3);
+        oddZetaSums[5] += 1 / Math.pow(k, 5);
+        oddZetaSums[7] += 1 / Math.pow(k, 7);
+        oddZetaSums[9] += 1 / Math.pow(k, 9);
+    }
+    [3, 5, 7, 9].forEach(s => { oddZetaEMA[s] = oddZetaSums[s]; });
+    
+    emaGamma = 1.0;
+    lockStability = 0;
+    gammaHistory = [];
+    gammaLocked = false;
+    gammaInvalid = false;
+    systemState = 'VALID';
+    omegaDecayFactor = 1.0;
+    
+    const config = DIMENSION_CONFIG[currentDimension];
+    initChannelState(config.sequences);
+    
+    document.getElementById('log').innerHTML = '';
+    document.getElementById('gammaClock').classList.remove('gamma-locked', 'degraded-mode', 'invalid-mode');
+    
+    updateTruthAnchorPanel(1.0, 0, true, 1, 'VALID');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN COMPUTATION STEP
+// ═══════════════════════════════════════════════════════════════
+
+function step() {
+    fibStep(); lucStep(); catStep(); motzkinStep(); pellStep(); zetaStep(); oddZetaStep();
+    n++;
+
+    const config = DIMENSION_CONFIG[currentDimension];
+    const targets = config.targets;
+    const tol = getTolerance(n);
+    const coreSequences = config.sequences.filter(s => s !== 'oddZeta');
+    
+    const rawRatios = {
+        fib: preciseRatio(fCurr, fPrev),
+        luc: preciseRatio(lCurr, lPrev),
+        cat: preciseRatio(cCurr, cPrev),
+        motz: acceleratedMotzkinRatio(preciseRatio(mCurr, mPrev)),
+        pell: preciseRatio(pCurr, pPrev),
+        zeta2: zetaSums[2],
+        zeta4: zetaSums[4],
+        zeta6: zetaSums[6],
+        oddZeta: 1.0
+    };
+    
+    const ratios = {};
+    coreSequences.forEach(seq => {
+        const target = targets[seq];
+        const corrupted = simulateCorruption(seq, rawRatios[seq]);
+        ratios[seq] = corrupted;
+        channelErrors[seq] = Math.abs(corrupted - target) / Math.abs(target);
+    });
+    ratios.oddZeta = rawRatios.oddZeta;
+    
+    const checks = {};
+    coreSequences.forEach(seq => {
+        const passed = Math.abs(ratios[seq] - targets[seq]) < tol[seq];
+        checks[seq] = channelBlocked[seq] ? null : passed;
+        updateChannelHealth(seq, passed, coreSequences);
+        
+        const status = getChannelStatus(seq);
+        updateChannelDisplay(seq, status, channelHealth[seq], channelErrors[seq]);
+        
+        const cell = document.getElementById(`cell-${seq}`);
+        if (cell) {
+            cell.classList.remove('channel-blocked', 'channel-suspect');
+            if (status === 'blocked') cell.classList.add('channel-blocked');
+            else if (status === 'suspect') cell.classList.add('channel-suspect');
+        }
+    });
+    
+    computeOmegaDecay(coreSequences);
+    
+    const systemHealth = getSystemHealth(coreSequences);
+    updateHealthRing(systemHealth);
+    
+    const activeSequences = getActiveChannels(coreSequences);
+    const quorumMet = hasQuorum(coreSequences);
+    
+    let gammaProduct = 1, gammaCount = 0;
+    activeSequences.forEach(seq => {
+        const normalized = ratios[seq] / targets[seq];
+        gammaProduct *= normalized;
+        gammaCount++;
+    });
+    
+    gammaInvalid = !quorumMet;
+    
+    const gammaRaw = gammaCount > 0 ? Math.pow(gammaProduct, 1 / gammaCount) : 1;
+    emaGamma = gammaInvalid ? emaGamma : EMA_ALPHA * gammaRaw + (1 - EMA_ALPHA) * emaGamma;
+    const gamma = emaGamma;
+    
+    const fibRatio = ratios.fib;
+    const pellRatio = ratios.pell;
+    
+    if (config.oddZetaMode) {
+        [3, 5, 7, 9].forEach(s => {
+            oddZetaAccelerated[s] = constantLockedAcceleration(s, oddZetaSums[s], fibRatio, pellRatio, gamma);
+        });
+        
+        const oddZetaQuality = [3, 5, 7, 9].reduce((sum, s) => {
+            const err = Math.abs(oddZetaAccelerated[s] - ZETA_ODD_TARGETS[s]);
+            return sum + (1 / (1 + err * 100));
+        }, 0) / 4;
+        
+        ratios.oddZeta = oddZetaQuality;
+        checks.oddZeta = oddZetaQuality > 0.8;
+        
+        [3, 5, 7, 9].forEach(s => {
+            const valueEl = document.getElementById(`zeta${s}Value`);
+            const accelEl = document.getElementById(`zeta${s}Accel`);
+            const errorEl = document.getElementById(`zeta${s}Error`);
+            const stabEl = document.getElementById(`zeta${s}Stability`);
+            const itemEl = document.getElementById(`zeta${s}Item`);
+            if (valueEl) {
+                valueEl.textContent = oddZetaAccelerated[s].toFixed(10);
+                const error = Math.abs(oddZetaAccelerated[s] - ZETA_ODD_TARGETS[s]);
+                const naiveError = Math.abs(oddZetaSums[s] - ZETA_ODD_TARGETS[s]);
+                const speedup = naiveError > 1e-15 ? (naiveError / Math.max(error, 1e-15)).toFixed(1) : '∞';
+                accelEl.textContent = `Speedup: ${speedup}x`;
+                errorEl.textContent = `Error: ${error.toExponential(2)}`;
+                stabEl.textContent = `Stability: ${(oddZetaStability[s] * 100).toFixed(0)}%`;
+                itemEl.classList.toggle('accelerating', error < naiveError * 0.5);
+                itemEl.classList.toggle('stabilized', oddZetaStability[s] > 0.8);
+            }
+        });
+    }
+    
+    const ramosTime = n - config.delta * (2 - gamma);
+    const timeDelta = Math.abs(n - ramosTime);
+    const omega = (n * gamma * PHI / (PHI + 1)) * omegaDecayFactor;
+    
+    config.sequences.forEach(seq => {
+        const el = document.getElementById(`${seq}Ratio`);
+        if (el) el.textContent = seq === 'oddZeta' ? (ratios[seq] * 100).toFixed(1) + '%' : ratios[seq].toFixed(6);
+    });
+    
+    document.getElementById('gammaValue').textContent = gammaInvalid ? '—' : gamma.toFixed(8);
+    document.getElementById('clockDisplay').textContent = `n = ${n.toLocaleString()}`;
+    document.getElementById('ramosTimeDisplay').textContent = `${config.rtSymbol} = ${ramosTime.toFixed(2)}`;
+    document.getElementById('timeDelta').textContent = `Δ = ${timeDelta.toFixed(4)}`;
+    
+    const gammaMetrics = document.getElementById('gammaMetrics');
+    const gammaDisplay = document.getElementById('gammaDisplay');
+    gammaDisplay.textContent = gammaInvalid ? 'INVALID' : gamma.toFixed(6);
+    gammaMetrics.classList.toggle('invalid', gammaInvalid);
+    
+    document.getElementById('psiDisplay').textContent = (gamma * Math.log(n)).toFixed(4);
+    document.getElementById('omegaDisplay').textContent = omega.toFixed(2);
+    
+    const blockedCount = coreSequences.filter(s => channelBlocked[s]).length;
+    document.getElementById('activeChannelsDisplay').innerHTML = 
+        `Active: <span class="count">${activeSequences.length}/${coreSequences.length}</span> channels | ` +
+        `Blocked: <span class="blocked">${blockedCount}</span>`;
+    
+    updateResilienceStats(coreSequences);
+    
+    // Update HITL pending items
+    hitlPendingReview.forEach(item => {
+        item.progress = channelStableCount[item.seq];
+    });
+    updateHITLPanel();
+    
+    checks.gamma = !gammaInvalid && Math.abs(gamma - 1) < tol.gamma;
+    
+    config.sequences.forEach(seq => {
+        const el = document.getElementById(`v${seq}`);
+        if (el) {
+            if (checks[seq] === null) {
+                el.textContent = `${SEQ_INFO[seq].symbol}: ⊘`;
+                el.className = 'verify-item blocked';
+            } else {
+                el.textContent = `${SEQ_INFO[seq].symbol}: ${checks[seq] ? '✓' : '○'}`;
+                el.className = `verify-item ${checks[seq] ? 'pass' : 'fail'}`;
+            }
+        }
+    });
+    
+    const vGamma = document.getElementById('vGamma');
+    if (gammaInvalid) {
+        vGamma.textContent = `${config.symbol}: ⊘`;
+        vGamma.className = 'verify-item blocked';
+    } else {
+        vGamma.textContent = `${config.symbol}: ${checks.gamma ? '✓' : '○'}`;
+        vGamma.className = `verify-item ${checks.gamma ? 'pass' : 'fail'}`;
+    }
+    
+    lockStability = checks.gamma ? Math.min(currentDimension, lockStability + 1) : Math.max(0, lockStability - 0.5);
+    gammaHistory.push(checks.gamma);
+    if (gammaHistory.length > currentDimension) gammaHistory.shift();
+    
+    const allChecks = Object.values(checks).filter(c => c !== null);
+    const convergenceRate = allChecks.length > 0 ? allChecks.filter(x => x).length / allChecks.length : 0;
+    const requiredStable = Math.max(3, Math.ceil(currentDimension * 0.8));
+    
+    gammaLocked = !gammaInvalid && lockStability >= currentDimension && gammaHistory.length >= requiredStable && gammaHistory.slice(-requiredStable).every(x => x);
+    
+    systemState = determineSystemState(coreSequences, !gammaInvalid, gammaLocked);
+    
+    const errorBound = activeSequences.reduce((max, seq) => Math.max(max, channelErrors[seq] || 0), 0);
+    updateTruthAnchorPanel(gamma, errorBound, quorumMet, omegaDecayFactor, systemState);
+    
+    const confidence = (lockStability / currentDimension) * 100;
+    document.getElementById('confidenceFill').style.width = `${confidence}%`;
+    document.getElementById('confidenceLabel').textContent = `Lock Confidence: ${confidence.toFixed(0)}%`;
+    document.getElementById('convergenceFill').style.width = `${convergenceRate * 100}%`;
+    
+    const lockIndicator = document.getElementById('gammaLockIndicator');
+    const lockText = document.getElementById('lockText');
+    const gammaClock = document.getElementById('gammaClock');
+    
+    gammaClock.classList.remove('gamma-locked', 'degraded-mode', 'invalid-mode');
+    lockIndicator.classList.remove('locked', 'degraded', 'invalid');
+    lockText.classList.remove('locked', 'degraded', 'invalid');
+    
+    if (gammaInvalid) {
+        lockText.textContent = `⊘ Γ* INVALID — QUORUM LOST (${activeSequences.length}/${Math.ceil(coreSequences.length * CHANNEL_CONFIG.minActiveRatio)})`;
+        lockText.classList.add('invalid');
+        lockIndicator.classList.add('invalid');
+        gammaClock.classList.add('invalid-mode');
+    } else if (gammaLocked) {
+        lockIndicator.classList.add('locked');
+        lockText.classList.add('locked');
+        lockText.textContent = `✓ ${currentDimension}D GAMMA LOCK — ${config.name.toUpperCase()} VERIFIED`;
+        gammaClock.classList.add('gamma-locked');
+    } else if (blockedCount > 0) {
+        lockText.textContent = `DEGRADED (${blockedCount} blocked) — ${gammaHistory.filter(x => x).length}/${requiredStable}`;
+        lockText.classList.add('degraded');
+        lockIndicator.classList.add('degraded');
+        gammaClock.classList.add('degraded-mode');
+    } else {
+        lockText.textContent = `AWAITING ${currentDimension}D GAMMA LOCK (${gammaHistory.filter(x => x).length}/${requiredStable})`;
+    }
+    
+    const isPow2 = (n & (n-1)) === 0 && n > 2;
+    const isDecade = [10, 50, 100, 500, 1000, 5000, 10000].includes(n);
+    
+    if (isPow2 || isDecade) {
+        const row = document.createElement('tr');
+        row.className = 'new';
+        if (gammaLocked) row.classList.add('gamma-lock-row');
+        if (blockedCount > 0) row.classList.add('channel-drop-row');
+        if (gammaInvalid) row.classList.add('invalid-row');
+        
+        let cells = `<td>${n.toLocaleString()}</td>`;
+        ['fib', 'luc', 'cat', 'motz', 'pell'].forEach(seq => {
+            const isBlocked = channelBlocked[seq];
+            const color = isBlocked ? '#666' : SEQ_INFO[seq].color;
+            const value = isBlocked ? '—' : ratios[seq].toFixed(4);
+            cells += `<td style="color:${color}">${value}</td>`;
+        });
+        cells += `<td class="convergence">${gammaInvalid ? '—' : gamma.toFixed(5)}</td>`;
+        cells += `<td style="color:#ff88aa">${ramosTime.toFixed(1)}</td>`;
+        cells += `<td style="color:${blockedCount > 0 ? '#ffaa00' : '#44ff88'}">${(systemHealth * 100).toFixed(0)}%</td>`;
+        
+        const stateColors = { VALID: '#44ff88', DEGRADED: '#ffaa00', INVALID: '#ff4444', LOCKED: '#88ff44' };
+        cells += `<td style="color:${stateColors[systemState]}">${systemState}</td>`;
+        
+        row.innerHTML = cells;
+        document.getElementById('log').appendChild(row);
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN LOOP
+// ═══════════════════════════════════════════════════════════════
+
+async function run() {
+    while (running) {
+        const batchSize = n < 1000 ? 10 : n < 10000 ? 50 : 200;
+        for (let i = 0; i < batchSize && running; i++) step();
+        await new Promise(r => setTimeout(r, 16));
+    }
+}
+
+function start() { if (running) return; resetState(); running = true; run(); }
+function stop() { running = false; }
+
+// Initialize
+setDimension(5);
+</script>
+
+</body>
+</html>
