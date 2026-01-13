@@ -1,0 +1,3282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>⟨ TruthAnchor v2.0 ⟩ — Trinity Protocol v4</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a24;
+            --border-dim: #333;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --text-muted: #555;
+            --accent-green: #44ff88;
+            --accent-yellow: #ffaa00;
+            --accent-red: #ff4444;
+            --accent-blue: #88aaff;
+            --accent-purple: #aa66ff;
+            --accent-cyan: #44ffff;
+            --accent-gold: #ffd700;
+            --fib-color: #aa66ff;
+            --luc-color: #66ffaa;
+            --cat-color: #ffaa66;
+            --motz-color: #66aaff;
+            --pell-color: #ff66aa;
+            --zeta-color: #ffff66;
+            --public-color: #88ff88;
+            --shared-color: #ff8844;
+            --protected-user-color: #ff66ff;
+            --open-user-color: #66ffff;
+            --trinity-color: #7c3aed;
+        }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.4;
+            background-image: 
+                radial-gradient(ellipse at 20% 20%, rgba(124, 58, 237, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(68, 255, 136, 0.04) 0%, transparent 50%);
+        }
+
+        h1 {
+            background: linear-gradient(90deg, #44ff88, #7c3aed, #44ffff, #ff66ff, #44ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 6px;
+            font-size: 1.6em;
+            letter-spacing: 3px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.8em;
+            margin-bottom: 8px;
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .truth-anchor-badge {
+            background: linear-gradient(135deg, #0a1a0f, #1a0a2a, #0f1a1a);
+            border: 2px solid var(--trinity-color);
+            border-radius: 8px;
+            padding: 12px 24px;
+            margin-bottom: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .truth-anchor-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.15), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .truth-anchor-badge .principle {
+            font-family: Georgia, serif;
+            font-style: italic;
+            color: var(--accent-green);
+            font-size: 0.95em;
+        }
+
+        .truth-anchor-badge .subtext {
+            color: var(--text-muted);
+            font-size: 0.65em;
+            margin-top: 4px;
+        }
+
+        .trinity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(6, 182, 212, 0.3));
+            border: 1px solid var(--trinity-color);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.6em;
+            color: var(--trinity-color);
+            margin-top: 8px;
+        }
+
+        .architecture-note {
+            background: linear-gradient(135deg, #0a1a1a, #1a0a2a, #1a1a0a, #1a0a1a);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            font-size: 0.65em;
+            text-align: center;
+            max-width: 950px;
+            line-height: 1.6;
+        }
+
+        .architecture-note .public { color: var(--public-color); font-weight: bold; }
+        .architecture-note .shared { color: var(--shared-color); font-weight: bold; }
+        .architecture-note .protected-user { color: var(--protected-user-color); font-weight: bold; }
+        .architecture-note .open-user { color: var(--open-user-color); font-weight: bold; }
+        .architecture-note .trinity { color: var(--trinity-color); font-weight: bold; }
+
+        /* Dimension Selector */
+        .dimension-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .dim-btn {
+            padding: 8px 16px;
+            font-size: 0.8em;
+            font-weight: bold;
+            border-radius: 4px;
+            border: 2px solid var(--border-dim);
+            cursor: pointer;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .dim-btn:hover { border-color: #555; color: #aaa; }
+        .dim-btn.active {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background: #0a1a0f;
+            box-shadow: 0 0 12px rgba(68, 255, 136, 0.3);
+        }
+
+        .dim-btn.d5.active { border-color: var(--fib-color); color: var(--fib-color); background: #1a0a2a; }
+        .dim-btn.d6.active { border-color: var(--luc-color); color: var(--luc-color); background: #0a1a1a; }
+        .dim-btn.d7.active { border-color: var(--cat-color); color: var(--cat-color); background: #1a1a0a; }
+        .dim-btn.d8.active { border-color: var(--motz-color); color: var(--motz-color); background: #0a1a2a; }
+        .dim-btn.d9.active { border-color: var(--accent-red); color: var(--accent-red); background: #2a0a0a; }
+
+        /* Equation Display */
+        .equation-display {
+            background: linear-gradient(90deg, #1a0a2a, #0a1a1a, #1a1a0a, #0a1a2a);
+            border: 1px solid var(--accent-green);
+            border-radius: 6px;
+            padding: 10px 20px;
+            margin-bottom: 12px;
+            font-family: Georgia, serif;
+            font-size: 0.85em;
+            color: #88ffcc;
+            text-align: center;
+        }
+
+        .equation-display .note {
+            font-size: 0.7em;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 24px;
+            font-size: 0.9em;
+            font-weight: bold;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        button:hover { transform: scale(1.02); }
+        button:active { transform: scale(0.98); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-green), #66ffaa);
+            color: #000;
+        }
+
+        .btn-stop { background: var(--accent-red); color: #fff; }
+
+        .btn-chaos {
+            background: linear-gradient(90deg, #ff4444, #ff8800, #ff4444);
+            color: #fff;
+            font-size: 0.8em;
+            padding: 8px 16px;
+            animation: chaos-pulse 2s infinite;
+        }
+
+        @keyframes chaos-pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(255, 136, 0, 0.5); }
+        }
+
+        .btn-hitl {
+            background: linear-gradient(135deg, #1a1a2a, #2a1a2a);
+            border: 2px solid var(--accent-purple);
+            color: var(--accent-purple);
+            font-size: 0.75em;
+            padding: 8px 14px;
+        }
+
+        .btn-hitl:hover { background: var(--accent-purple); color: #000; }
+
+        .btn-trinity {
+            background: linear-gradient(135deg, var(--trinity-color), #a855f7);
+            color: #fff;
+            font-size: 0.75em;
+            padding: 8px 14px;
+        }
+
+        .btn-user {
+            background: linear-gradient(135deg, #1a0a2a, #2a0a1a);
+            border: 2px solid var(--protected-user-color);
+            color: var(--protected-user-color);
+            font-size: 0.75em;
+            padding: 8px 14px;
+        }
+
+        /* System State Banner */
+        .system-state-banner {
+            width: 100%;
+            max-width: 1000px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+
+        .system-state-banner.valid {
+            background: linear-gradient(135deg, #0a1a0f, #0f1a0a);
+            border: 2px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .system-state-banner.degraded {
+            background: linear-gradient(135deg, #1a1a0a, #1a0f0a);
+            border: 2px solid var(--accent-yellow);
+            color: var(--accent-yellow);
+            animation: degraded-pulse 1.5s infinite;
+        }
+
+        .system-state-banner.critical {
+            background: linear-gradient(135deg, #2a0a1a, #1a0a0a);
+            border: 2px solid var(--protected-user-color);
+            color: var(--protected-user-color);
+            animation: critical-pulse 0.6s infinite;
+        }
+
+        .system-state-banner.invalid {
+            background: linear-gradient(135deg, #2a0a0a, #1a0a0a);
+            border: 2px solid var(--accent-red);
+            color: var(--accent-red);
+            animation: invalid-pulse 0.8s infinite;
+        }
+
+        .system-state-banner.locked {
+            background: linear-gradient(135deg, #0a2a0f, #0f2a1a);
+            border: 3px solid var(--accent-green);
+            color: var(--accent-green);
+            box-shadow: 0 0 30px rgba(68, 255, 136, 0.4);
+        }
+
+        @keyframes degraded-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 170, 0, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(255, 170, 0, 0.5); }
+        }
+
+        @keyframes critical-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 102, 255, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(255, 102, 255, 0.7); }
+        }
+
+        @keyframes invalid-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .system-state-banner .state-label { font-size: 0.9em; }
+        .system-state-banner .state-detail {
+            font-size: 0.65em;
+            font-weight: normal;
+            color: inherit;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        /* Trinity Channel Panel */
+        .trinity-panel {
+            background: linear-gradient(135deg, #0a0a1a, #1a0a2a);
+            border: 2px solid var(--trinity-color);
+            border-radius: 10px;
+            padding: 15px 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .trinity-panel::before {
+            content: '🔐 TRINITY PROTOCOL v4 — SECURITY MATRIX';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--bg-primary);
+            padding: 0 10px;
+            font-size: 0.6em;
+            color: var(--trinity-color);
+            letter-spacing: 2px;
+        }
+
+        .trinity-panel h3 {
+            color: var(--trinity-color);
+            font-size: 0.75em;
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        .trinity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+        }
+
+        .trinity-channel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-dim);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .trinity-channel.public {
+            border-color: var(--public-color);
+            background: linear-gradient(135deg, #0a1a0f, #0f1a0a);
+        }
+
+        .trinity-channel.shared {
+            border-color: var(--shared-color);
+            background: linear-gradient(135deg, #1a0f0a, #0a0a1a);
+        }
+
+        .trinity-channel.protected-user {
+            border-color: var(--protected-user-color);
+            background: linear-gradient(135deg, #1a0a1a, #0a0a1a);
+        }
+
+        .trinity-channel.open-user {
+            border-color: var(--open-user-color);
+            background: linear-gradient(135deg, #0a1a1a, #0a0a1a);
+        }
+
+        .trinity-channel.verified {
+            box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+        }
+
+        .trinity-channel.compromised {
+            border-color: var(--accent-red);
+            background: linear-gradient(135deg, #2a0a0a, #1a0a0a);
+            animation: compromised-pulse 1s infinite;
+        }
+
+        @keyframes compromised-pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 68, 68, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(255, 68, 68, 0.5); }
+        }
+
+        .trinity-channel-icon { font-size: 1.2em; margin-bottom: 4px; }
+        .trinity-channel-name { font-size: 0.65em; color: var(--text-secondary); margin-bottom: 3px; }
+        .trinity-channel-type { font-size: 0.5em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+
+        .trinity-channel.public .trinity-channel-type { color: var(--public-color); }
+        .trinity-channel.shared .trinity-channel-type { color: var(--shared-color); }
+        .trinity-channel.protected-user .trinity-channel-type { color: var(--protected-user-color); }
+        .trinity-channel.open-user .trinity-channel-type { color: var(--open-user-color); }
+
+        .trinity-channel-status {
+            font-size: 0.55em;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .trinity-channel.public .trinity-channel-status {
+            background: rgba(136, 255, 136, 0.2);
+            color: var(--public-color);
+        }
+
+        .trinity-channel.shared .trinity-channel-status {
+            background: rgba(255, 136, 68, 0.2);
+            color: var(--shared-color);
+        }
+
+        .trinity-channel.protected-user .trinity-channel-status {
+            background: rgba(255, 102, 255, 0.2);
+            color: var(--protected-user-color);
+        }
+
+        .trinity-channel.open-user .trinity-channel-status {
+            background: rgba(102, 255, 255, 0.2);
+            color: var(--open-user-color);
+        }
+
+        .trinity-channel.compromised .trinity-channel-status {
+            background: rgba(255, 68, 68, 0.2);
+            color: var(--accent-red);
+        }
+
+        .trinity-commitment {
+            font-family: monospace;
+            font-size: 0.45em;
+            color: var(--text-muted);
+            margin-top: 4px;
+            word-break: break-all;
+            background: var(--bg-tertiary);
+            padding: 3px 5px;
+            border-radius: 4px;
+        }
+
+        .trinity-noise-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 0.45em;
+            color: var(--cat-color);
+            background: rgba(255, 170, 102, 0.15);
+            padding: 2px 5px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 170, 102, 0.3);
+            margin-top: 4px;
+        }
+
+        .trinity-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-dim);
+        }
+
+        .trinity-stat {
+            text-align: center;
+            background: var(--bg-tertiary);
+            padding: 6px;
+            border-radius: 6px;
+        }
+
+        .trinity-stat-value {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: var(--trinity-color);
+        }
+
+        .trinity-stat-label {
+            font-size: 0.45em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Noise Confidence Panel */
+        .noise-confidence-panel {
+            background: linear-gradient(135deg, #1a1a0a, #0a1a1a);
+            border: 2px solid var(--cat-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .noise-confidence-panel h3 {
+            color: var(--cat-color);
+            font-size: 0.7em;
+            text-align: center;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .noise-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .noise-item {
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .noise-item.cat { border: 1px solid var(--cat-color); }
+        .noise-item.motz { border: 1px solid var(--motz-color); }
+
+        .noise-label { font-size: 0.6em; color: var(--text-secondary); margin-bottom: 4px; }
+        .noise-value { font-size: 1.1em; font-family: Georgia, serif; }
+        .noise-item.cat .noise-value { color: var(--cat-color); }
+        .noise-item.motz .noise-value { color: var(--motz-color); }
+
+        .noise-samples { font-size: 0.5em; color: var(--text-muted); margin-top: 4px; }
+
+        .confidence-boost {
+            text-align: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-dim);
+        }
+
+        .confidence-boost-label { font-size: 0.55em; color: var(--text-secondary); }
+        .confidence-boost-value { 
+            font-size: 1.2em; 
+            font-family: Georgia, serif; 
+            color: var(--accent-green);
+            margin-top: 4px;
+        }
+
+        /* Health Ring Container */
+        .health-ring-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .health-ring {
+            position: relative;
+            width: 160px;
+            height: 160px;
+        }
+
+        .health-ring svg { transform: rotate(-90deg); }
+
+        .health-ring-bg { fill: none; stroke: var(--bg-tertiary); stroke-width: 10; }
+
+        .health-ring-fill {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease, stroke 0.3s;
+        }
+
+        .health-ring-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .health-ring-value {
+            font-size: 1.6em;
+            font-family: Georgia, serif;
+            color: var(--accent-green);
+        }
+
+        .health-ring-label {
+            font-size: 0.55em;
+            color: var(--text-secondary);
+        }
+
+        .channel-arcs {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .channel-arc-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.6em;
+        }
+
+        .channel-arc-name {
+            width: 55px;
+            color: var(--text-secondary);
+            text-align: right;
+            font-size: 0.9em;
+        }
+
+        .channel-arc-bar {
+            width: 80px;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .channel-arc-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .channel-arc-value {
+            width: 40px;
+            font-family: Georgia, serif;
+        }
+
+        .channel-arc-item.public .channel-arc-name { color: var(--public-color); }
+        .channel-arc-item.shared .channel-arc-name { color: var(--shared-color); }
+        .channel-arc-item.protected-user .channel-arc-name { color: var(--protected-user-color); }
+        .channel-arc-item.open-user .channel-arc-name { color: var(--open-user-color); }
+
+        /* TruthAnchor Output Panel */
+        .truth-anchor-output {
+            background: linear-gradient(135deg, #0a0f0a, #0f0a0f);
+            border: 3px solid var(--accent-green);
+            border-radius: 10px;
+            padding: 15px 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .truth-anchor-output::before {
+            content: '◈ TRUTHANCHOR OUTPUT — IMMUTABLE';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--bg-primary);
+            padding: 0 10px;
+            font-size: 0.65em;
+            color: var(--accent-green);
+            letter-spacing: 2px;
+        }
+
+        .anchor-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .anchor-metric {
+            background: var(--bg-secondary);
+            border: 1px solid #2a2a3a;
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .anchor-metric.primary {
+            border-color: var(--accent-green);
+            background: #0a1a0f;
+        }
+
+        .anchor-metric.warning { border-color: var(--accent-yellow); }
+        .anchor-metric.error { border-color: var(--accent-red); }
+        .anchor-metric.critical { border-color: var(--protected-user-color); }
+
+        .anchor-metric-label {
+            font-size: 0.5em;
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .anchor-metric-value {
+            font-size: 1em;
+            font-family: Georgia, serif;
+            color: var(--accent-green);
+        }
+
+        .anchor-metric.warning .anchor-metric-value { color: var(--accent-yellow); }
+        .anchor-metric.error .anchor-metric-value { color: var(--accent-red); }
+        .anchor-metric.critical .anchor-metric-value { color: var(--protected-user-color); }
+
+        .anchor-metric-detail {
+            font-size: 0.45em;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* User Channel Panel */
+        .user-channel-panel {
+            background: linear-gradient(135deg, #1a0a1a, #0a1a1a);
+            border: 2px solid var(--protected-user-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+        }
+
+        .user-channel-panel::before {
+            content: '👤 USER CHANNELS — IMMUTABLE DESIGNATION';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--bg-primary);
+            padding: 0 10px;
+            font-size: 0.55em;
+            color: var(--protected-user-color);
+            letter-spacing: 1px;
+        }
+
+        .user-channel-panel h3 {
+            color: var(--protected-user-color);
+            font-size: 0.7em;
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .user-item {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-dim);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .user-item.protected {
+            border-color: var(--protected-user-color);
+            background: linear-gradient(135deg, #1a0a1a, #0f0a0f);
+        }
+
+        .user-item.open {
+            border-color: var(--open-user-color);
+            background: linear-gradient(135deg, #0a1a1a, #0a0f0f);
+        }
+
+        .user-item.healthy {
+            box-shadow: 0 0 8px rgba(68, 255, 136, 0.2);
+        }
+
+        .user-item.suspect {
+            animation: suspect-pulse 1.5s infinite;
+        }
+
+        .user-item.blocked {
+            opacity: 0.7;
+        }
+
+        .user-item.recovering {
+            animation: recovering-pulse 1s infinite;
+        }
+
+        @keyframes suspect-pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 170, 0, 0.3); }
+            50% { box-shadow: 0 0 12px rgba(255, 170, 0, 0.5); }
+        }
+
+        @keyframes recovering-pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(136, 170, 255, 0.3); }
+            50% { box-shadow: 0 0 12px rgba(136, 170, 255, 0.5); }
+        }
+
+        .user-icon { font-size: 1.4em; margin-bottom: 6px; }
+        .user-name { font-size: 0.7em; color: var(--text-secondary); margin-bottom: 4px; }
+        .user-designation {
+            font-size: 0.55em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+
+        .user-item.protected .user-designation {
+            background: rgba(255, 102, 255, 0.2);
+            color: var(--protected-user-color);
+            border: 1px solid var(--protected-user-color);
+        }
+
+        .user-item.open .user-designation {
+            background: rgba(102, 255, 255, 0.2);
+            color: var(--open-user-color);
+            border: 1px solid var(--open-user-color);
+        }
+
+        .user-status { font-size: 0.75em; font-weight: bold; margin-bottom: 6px; }
+
+        .user-item.healthy .user-status { color: var(--accent-green); }
+        .user-item.suspect .user-status { color: var(--accent-yellow); }
+        .user-item.blocked .user-status { color: var(--accent-red); }
+        .user-item.recovering .user-status { color: var(--accent-blue); }
+
+        .user-health-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            margin: 6px 0;
+            overflow: hidden;
+        }
+
+        .user-health-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .user-metrics { font-size: 0.5em; color: var(--text-muted); }
+        .user-sensitivity { font-size: 0.45em; color: var(--protected-user-color); margin-top: 4px; }
+
+        /* Sensor Channel Panel */
+        .sensor-channel-panel {
+            background: linear-gradient(135deg, #1a0f0a, #0a0a1a);
+            border: 2px solid var(--shared-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+        }
+
+        .sensor-channel-panel::before {
+            content: '📡 SENSOR — SHARED WITH CORE + HITL';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--bg-primary);
+            padding: 0 10px;
+            font-size: 0.55em;
+            color: var(--shared-color);
+            letter-spacing: 1px;
+        }
+
+        .sensor-channel-panel h3 {
+            color: var(--shared-color);
+            font-size: 0.7em;
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .sensor-item {
+            background: var(--bg-secondary);
+            border: 2px solid var(--shared-color);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .sensor-item.healthy { background: linear-gradient(135deg, #0a1a0f, #0a0a1a); }
+        .sensor-item.suspect { background: linear-gradient(135deg, #1a1a0a, #0a0a1a); }
+        .sensor-item.blocked { background: linear-gradient(135deg, #2a0a0a, #0a0a1a); opacity: 0.7; }
+
+        .sensor-icon { font-size: 1.5em; margin-bottom: 6px; }
+        .sensor-name { font-size: 0.7em; color: var(--text-secondary); margin-bottom: 4px; }
+        .sensor-status { font-size: 0.8em; font-weight: bold; margin-bottom: 6px; }
+
+        .sensor-item.healthy .sensor-status { color: var(--accent-green); }
+        .sensor-item.suspect .sensor-status { color: var(--accent-yellow); }
+        .sensor-item.blocked .sensor-status { color: var(--accent-red); }
+
+        .sensor-shared-badge {
+            font-size: 0.5em;
+            color: var(--shared-color);
+            background: rgba(255, 136, 68, 0.15);
+            padding: 2px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 136, 68, 0.3);
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+
+        .sensor-health-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            margin: 6px 0;
+            overflow: hidden;
+        }
+
+        .sensor-health-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .sensor-metrics { font-size: 0.5em; color: var(--text-muted); }
+
+        /* Corruption Controls */
+        .corruption-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border-dim);
+        }
+
+        .corrupt-btn {
+            padding: 6px 14px;
+            font-size: 0.65em;
+            border-radius: 4px;
+            border: 1px solid var(--accent-red);
+            background: #2a0a0a;
+            color: #ff6666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .corrupt-btn:hover {
+            background: #3a1a1a;
+            border-color: #ff6666;
+        }
+
+        .corrupt-btn.active {
+            background: var(--accent-red);
+            color: #000;
+            font-weight: bold;
+        }
+
+        .corrupt-btn.clear {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background: #0a1a0f;
+        }
+
+        /* Resilience Stats */
+        .resilience-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-dim);
+        }
+
+        .resilience-stat {
+            text-align: center;
+            padding: 6px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            border: 1px solid #2a2a3a;
+        }
+
+        .resilience-stat.warning { border-color: var(--accent-yellow); }
+        .resilience-stat.critical { border-color: var(--protected-user-color); }
+
+        .resilience-stat-label {
+            font-size: 0.45em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .resilience-stat-value {
+            font-size: 0.8em;
+            font-family: Georgia, serif;
+            color: var(--accent-green);
+            margin-top: 2px;
+        }
+
+        .resilience-stat.warning .resilience-stat-value { color: var(--accent-yellow); }
+        .resilience-stat.critical .resilience-stat-value { color: var(--protected-user-color); }
+
+        /* Math Channels Panel */
+        .math-channels-panel {
+            background: linear-gradient(135deg, #0a1a0f, #0f1a0a);
+            border: 2px solid var(--public-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+        }
+
+        .math-channels-panel::before {
+            content: '📊 PUBLIC — VERIFIED/VERIFIABLE';
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: var(--bg-primary);
+            padding: 0 8px;
+            font-size: 0.55em;
+            color: var(--public-color);
+            letter-spacing: 1px;
+        }
+
+        .math-channels-panel h3 {
+            color: var(--public-color);
+            font-size: 0.75em;
+            text-align: center;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        .math-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+        }
+
+        .math-cell {
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid var(--border-dim);
+            position: relative;
+        }
+
+        .math-cell::before {
+            content: '✓';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            font-size: 0.6em;
+            color: var(--public-color);
+            opacity: 0.7;
+        }
+
+        .math-cell.noise-source::after {
+            content: '📊';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            font-size: 0.5em;
+        }
+
+        .math-cell.fib { border-color: var(--fib-color); }
+        .math-cell.luc { border-color: var(--luc-color); }
+        .math-cell.cat { border-color: var(--cat-color); }
+        .math-cell.motz { border-color: var(--motz-color); }
+        .math-cell.pell { border-color: var(--pell-color); }
+        .math-cell.zeta { border-color: var(--zeta-color); background: #1a1a0a; }
+        .math-cell.semantic { border-color: var(--accent-cyan); background: #0a1a1a; }
+        .math-cell.identity { border-color: var(--accent-gold); background: #1a1a0a; }
+        .math-cell.center { border-color: var(--accent-green); background: #0a1a0f; }
+
+        .math-value {
+            font-size: 0.9em;
+            font-family: Georgia, serif;
+            margin-bottom: 4px;
+        }
+
+        .math-cell.fib .math-value { color: #cc88ff; }
+        .math-cell.luc .math-value { color: #88ffcc; }
+        .math-cell.cat .math-value { color: #ffcc88; }
+        .math-cell.motz .math-value { color: #88ccff; }
+        .math-cell.pell .math-value { color: #ff88cc; }
+        .math-cell.zeta .math-value { color: #ffff88; }
+        .math-cell.semantic .math-value { color: var(--accent-cyan); }
+        .math-cell.identity .math-value { color: var(--accent-gold); }
+        .math-cell.center .math-value { color: var(--accent-green); }
+
+        .math-label { font-size: 0.5em; color: var(--text-secondary); }
+        .math-target { font-size: 0.42em; color: var(--text-muted); margin-top: 2px; }
+
+        /* Gamma Clock */
+        .gamma-clock {
+            background: linear-gradient(135deg, #0a0f0a, #0f0a1a, #1a0f0a);
+            border: 3px solid var(--accent-green);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gamma-clock::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(68, 255, 136, 0.03), transparent);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate { to { transform: rotate(360deg); } }
+
+        .gamma-clock.gamma-locked {
+            border-color: #88ff44;
+            box-shadow: 0 0 40px rgba(68, 255, 136, 0.4);
+        }
+
+        .gamma-clock.degraded-mode {
+            border-color: var(--accent-yellow);
+            box-shadow: 0 0 25px rgba(255, 170, 0, 0.3);
+        }
+
+        .gamma-clock.critical-mode {
+            border-color: var(--protected-user-color);
+            box-shadow: 0 0 30px rgba(255, 102, 255, 0.4);
+        }
+
+        .gamma-clock.invalid-mode {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 25px rgba(255, 68, 68, 0.4);
+        }
+
+        .gamma-clock h3 {
+            font-size: 0.85em;
+            color: var(--accent-green);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            position: relative;
+        }
+
+        .time-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .time-block { text-align: center; }
+        .time-label { font-size: 0.6em; color: var(--text-muted); margin-bottom: 4px; }
+
+        .clock-display {
+            font-size: 2em;
+            font-family: Georgia, serif;
+            color: var(--accent-green);
+            text-shadow: 0 0 20px rgba(68, 255, 136, 0.5);
+        }
+
+        .ramos-time {
+            font-size: 1.6em;
+            font-family: Georgia, serif;
+            color: #ff88aa;
+            text-shadow: 0 0 15px rgba(255, 136, 170, 0.4);
+        }
+
+        .time-delta { font-size: 0.65em; color: var(--text-secondary); }
+
+        .active-channels {
+            font-size: 0.6em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .active-channels .count { color: var(--accent-green); font-weight: bold; }
+        .active-channels .blocked { color: var(--accent-red); }
+        .active-channels .public { color: var(--public-color); }
+        .active-channels .protected-user { color: var(--protected-user-color); }
+
+        .gamma-value {
+            font-size: 0.9em;
+            color: #88ffcc;
+            margin-bottom: 10px;
+            font-family: Georgia, serif;
+            position: relative;
+        }
+
+        .gamma-value.invalid { color: var(--accent-red); }
+
+        .verification-status {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .verify-item {
+            background: var(--bg-secondary);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.5em;
+            transition: all 0.3s;
+        }
+
+        .verify-item.pass { border: 1px solid var(--accent-green); color: var(--accent-green); }
+        .verify-item.fail { border: 1px solid var(--accent-red); color: var(--accent-red); }
+        .verify-item.public { border: 1px solid var(--public-color); color: var(--public-color); }
+        .verify-item.shared { border: 1px solid var(--shared-color); color: var(--shared-color); }
+        .verify-item.protected-user { border: 1px solid var(--protected-user-color); color: var(--protected-user-color); }
+        .verify-item.open-user { border: 1px solid var(--open-user-color); color: var(--open-user-color); }
+        .verify-item.blocked { border: 1px solid var(--text-muted); color: var(--text-muted); opacity: 0.5; }
+
+        .gamma-lock-indicator {
+            margin-top: 12px;
+            padding: 10px 24px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            display: inline-block;
+            position: relative;
+        }
+
+        .gamma-lock-indicator.locked {
+            background: linear-gradient(90deg, #0a1a0a, #1a0a1a);
+            border: 2px solid var(--accent-green);
+            animation: lock-glow 2s infinite;
+        }
+
+        .gamma-lock-indicator.degraded {
+            background: linear-gradient(90deg, #1a1a0a, #1a0a0a);
+            border: 2px solid var(--accent-yellow);
+        }
+
+        .gamma-lock-indicator.critical {
+            background: linear-gradient(90deg, #1a0a1a, #0a0a1a);
+            border: 2px solid var(--protected-user-color);
+        }
+
+        .gamma-lock-indicator.invalid {
+            background: linear-gradient(90deg, #2a0a0a, #1a0a0a);
+            border: 2px solid var(--accent-red);
+        }
+
+        @keyframes lock-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(68, 255, 136, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(68, 255, 136, 0.6); }
+        }
+
+        .lock-text { font-size: 0.75em; color: var(--text-muted); }
+        .lock-text.locked { color: var(--accent-green); font-weight: bold; }
+        .lock-text.degraded { color: var(--accent-yellow); }
+        .lock-text.critical { color: var(--protected-user-color); }
+        .lock-text.invalid { color: var(--accent-red); }
+
+        .convergence-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .convergence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--fib-color), var(--luc-color), var(--cat-color), var(--motz-color), var(--pell-color));
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-yellow), var(--accent-green));
+            border-radius: 2px;
+            transition: width 0.5s;
+        }
+
+        .confidence-label {
+            font-size: 0.55em;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* HITL Modal */
+        .hitl-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hitl-overlay.active { display: flex; }
+
+        .hitl-modal {
+            background: linear-gradient(135deg, #1a1a2a, #2a1a2a);
+            border: 3px solid var(--accent-purple);
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .hitl-modal h2 {
+            color: var(--accent-purple);
+            margin-bottom: 15px;
+            font-size: 1em;
+            letter-spacing: 2px;
+        }
+
+        .hitl-modal p {
+            color: var(--text-secondary);
+            font-size: 0.7em;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .hitl-section {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .hitl-section-title {
+            font-size: 0.65em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hitl-section.sensor { border: 1px solid var(--shared-color); }
+        .hitl-section.sensor .hitl-section-title { color: var(--shared-color); }
+
+        .hitl-section.user-protected { border: 1px solid var(--protected-user-color); }
+        .hitl-section.user-protected .hitl-section-title { color: var(--protected-user-color); }
+
+        .hitl-section.user-open { border: 1px solid var(--open-user-color); }
+        .hitl-section.user-open .hitl-section-title { color: var(--open-user-color); }
+
+        .hitl-channels {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .hitl-channel-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-tertiary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-dim);
+        }
+
+        .hitl-channel-item .name { color: var(--text-primary); font-size: 0.75em; }
+        .hitl-channel-item .status { font-size: 0.65em; }
+        .hitl-channel-item .status.blocked { color: var(--accent-red); }
+        .hitl-channel-item .status.recovering { color: var(--accent-blue); }
+        .hitl-channel-item .status.healthy { color: var(--accent-green); }
+
+        .hitl-channel-item button {
+            padding: 4px 10px;
+            font-size: 0.6em;
+            border-radius: 4px;
+            background: var(--accent-purple);
+            color: #000;
+            border: none;
+            cursor: pointer;
+        }
+
+        .hitl-channel-item button:disabled {
+            background: var(--border-dim);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .hitl-sensitivity-warning {
+            background: rgba(255, 102, 255, 0.1);
+            border: 1px solid var(--protected-user-color);
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 12px;
+            font-size: 0.65em;
+            color: var(--protected-user-color);
+        }
+
+        .hitl-modal .close-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-dim);
+            color: var(--text-secondary);
+            padding: 8px 20px;
+            font-size: 0.75em;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* User Channel Creation Modal */
+        .user-create-modal {
+            background: linear-gradient(135deg, #1a0a1a, #0a1a1a);
+            border: 3px solid var(--protected-user-color);
+        }
+
+        .user-create-modal h2 { color: var(--protected-user-color); }
+
+        .user-create-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .user-create-form input {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-dim);
+            border-radius: 4px;
+            padding: 10px;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .user-create-form input:focus {
+            outline: none;
+            border-color: var(--protected-user-color);
+        }
+
+        .designation-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .designation-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75em;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .designation-btn.protected {
+            background: rgba(255, 102, 255, 0.2);
+            border: 2px solid var(--protected-user-color);
+            color: var(--protected-user-color);
+        }
+
+        .designation-btn.open {
+            background: rgba(102, 255, 255, 0.2);
+            border: 2px solid var(--open-user-color);
+            color: var(--open-user-color);
+        }
+
+        .designation-btn.selected {
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .designation-warning {
+            font-size: 0.6em;
+            color: var(--accent-yellow);
+            margin-top: 8px;
+        }
+
+        /* Log Table */
+        .scroll-container {
+            max-height: 160px;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 1100px;
+            border: 1px solid var(--border-dim);
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.45em;
+        }
+
+        th, td {
+            padding: 3px;
+            border-bottom: 1px solid #222;
+            text-align: right;
+        }
+
+        th {
+            color: var(--cat-color);
+            font-size: 0.6em;
+            position: sticky;
+            top: 0;
+            background: var(--bg-primary);
+        }
+
+        td:first-child { text-align: left; color: var(--accent-blue); }
+
+        tr.new { animation: flash 1s ease-out; }
+        tr.gamma-lock-row { background: rgba(68, 255, 136, 0.1); }
+        tr.critical-row { background: rgba(255, 102, 255, 0.15); }
+        tr.channel-drop-row { background: rgba(255, 136, 0, 0.1); }
+        tr.invalid-row { background: rgba(255, 68, 68, 0.1); }
+
+        @keyframes flash {
+            from { background: #2a1a2a; }
+            to { background: transparent; }
+        }
+
+        .convergence { color: var(--accent-green); }
+
+        /* Attribution */
+        .attribution {
+            margin-top: 15px;
+            font-size: 0.55em;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .license-badge {
+            margin-top: 10px;
+            font-size: 0.5em;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .license-badge a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .trinity-stats { grid-template-columns: repeat(3, 1fr); }
+            .noise-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.2em; }
+            .math-grid { grid-template-columns: repeat(2, 1fr); }
+            .user-grid { grid-template-columns: 1fr; }
+            .sensor-grid { grid-template-columns: 1fr; }
+            .trinity-grid { grid-template-columns: repeat(2, 1fr); }
+            .clock-display { font-size: 1.5em; }
+            .ramos-time { font-size: 1.2em; }
+            .health-ring { width: 130px; height: 130px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>⟨ TruthAnchor v2.0 ⟩</h1>
+
+<div class="subtitle">
+    Mathematical Root-of-Trust with Trinity Protocol v4<br/>
+    Public Math • Shared Sensors • Protected/Open User Channels • Noise Confidence
+</div>
+
+<div class="truth-anchor-badge">
+    <div class="principle">"Truth is not a vote. Truth is a limit."</div>
+    <div class="subtext">Mathematical invariants define correctness. Channels cryptographically isolated by designation.</div>
+    <div class="trinity-badge">🔐 TRINITY PROTOCOL v4 • SECURITY MATRIX • NOISE CONFIDENCE</div>
+</div>
+
+<div class="architecture-note">
+    <span class="public">📊 PUBLIC</span> Math channels are verified/verifiable. Catalan & Motzkin accumulate noise patterns for confidence.<br/>
+    <span class="shared">📡 SHARED</span> Sensor data flows to Core + HITL. <span class="protected-user">🔐 PROTECTED</span> User channels have heightened fault sensitivity.<br/>
+    <span class="open-user">🌐 OPEN</span> User channels use standard fault tolerance. Designation is <span class="trinity">IMMUTABLE</span> at creation.
+</div>
+
+<div class="dimension-selector">
+    <button class="dim-btn d5 active" onclick="setDimension(5)">5D Base</button>
+    <button class="dim-btn d6" onclick="setDimension(6)">6D +ζ(2)</button>
+    <button class="dim-btn d7" onclick="setDimension(7)">7D +ζ(4)</button>
+    <button class="dim-btn d8" onclick="setDimension(8)">8D +ζ(6)</button>
+    <button class="dim-btn d9" onclick="setDimension(9)">9D +ODD ζ</button>
+</div>
+
+<div class="equation-display">
+    <span id="eqFormula">Γ*₅(n) = ∏(Sᵢ/Tᵢ)^(1/|𝒜|)</span> where 𝒜 = active channels → <strong id="eqName">Robust Pentadimensional Lock</strong>
+    <div class="note">Public math verified. Noise confidence from Catalan/Motzkin. Protected users heightened sensitivity.</div>
+</div>
+
+<div class="controls">
+    <button class="btn-primary" id="startBtn" onclick="start()">▶ INITIATE Γ*</button>
+    <button class="btn-stop" onclick="stop()">■ HALT</button>
+    <button class="btn-chaos" onclick="injectChaos()">⚡ INJECT CHAOS</button>
+    <button class="btn-trinity" onclick="openTrinityPanel()">🔐 TRINITY STATUS</button>
+    <button class="btn-user" onclick="openUserCreate()">+ USER CHANNEL</button>
+    <button class="btn-hitl" onclick="openHITL()">👤 HITL REVIEW</button>
+</div>
+
+<!-- System State Banner -->
+<div class="system-state-banner valid" id="systemStateBanner">
+    <div class="state-label" id="stateLabel">SYSTEM VALID</div>
+    <div class="state-detail" id="stateDetail">All channels healthy. Trinity v4 active.</div>
+</div>
+
+<!-- Trinity Protocol Panel -->
+<div class="trinity-panel" id="trinityPanel">
+    <h3>⟨ SECURITY MATRIX STATUS ⟩</h3>
+    <div class="trinity-grid" id="trinityGrid"></div>
+    <div class="trinity-stats">
+        <div class="trinity-stat">
+            <div class="trinity-stat-value" id="trinityPublic">5</div>
+            <div class="trinity-stat-label">Public</div>
+        </div>
+        <div class="trinity-stat">
+            <div class="trinity-stat-value" id="trinityShared">1</div>
+            <div class="trinity-stat-label">Shared</div>
+        </div>
+        <div class="trinity-stat">
+            <div class="trinity-stat-value" id="trinityProtectedUser">1</div>
+            <div class="trinity-stat-label">Prot. User</div>
+        </div>
+        <div class="trinity-stat">
+            <div class="trinity-stat-value" id="trinityOpenUser">1</div>
+            <div class="trinity-stat-label">Open User</div>
+        </div>
+        <div class="trinity-stat">
+            <div class="trinity-stat-value" id="trinityCompromised">0</div>
+            <div class="trinity-stat-label">Compromised</div>
+        </div>
+    </div>
+</div>
+
+<!-- Noise Confidence Panel -->
+<div class="noise-confidence-panel" id="noiseConfidencePanel">
+    <h3>⟨ NOISE PATTERN CONFIDENCE — CATALAN & MOTZKIN ⟩</h3>
+    <div class="noise-grid">
+        <div class="noise-item cat">
+            <div class="noise-label">Catalan Noise Accumulator</div>
+            <div class="noise-value" id="catalanNoise">σ = 0.0000</div>
+            <div class="noise-samples" id="catalanSamples">Samples: 0</div>
+        </div>
+        <div class="noise-item motz">
+            <div class="noise-label">Motzkin Noise Accumulator</div>
+            <div class="noise-value" id="motzkinNoise">σ = 0.0000</div>
+            <div class="noise-samples" id="motzkinSamples">Samples: 0</div>
+        </div>
+    </div>
+    <div class="confidence-boost">
+        <div class="confidence-boost-label">Combined Noise Confidence Boost</div>
+        <div class="confidence-boost-value" id="noiseConfidenceBoost">+0.00%</div>
+    </div>
+</div>
+
+<!-- Health Ring + Channel Arcs -->
+<div class="health-ring-container">
+    <div class="health-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+            <circle class="health-ring-bg" cx="80" cy="80" r="65"/>
+            <circle class="health-ring-fill" id="healthRingFill" cx="80" cy="80" r="65"
+                    stroke="#44ff88" stroke-dasharray="408" stroke-dashoffset="0"/>
+        </svg>
+        <div class="health-ring-center">
+            <div class="health-ring-value" id="systemHealthValue">100%</div>
+            <div class="health-ring-label">CHANNEL HEALTH</div>
+        </div>
+    </div>
+    <div class="channel-arcs" id="channelArcs"></div>
+</div>
+
+<!-- TruthAnchor Output Panel -->
+<div class="truth-anchor-output" id="truthAnchorOutput">
+    <div class="anchor-metrics">
+        <div class="anchor-metric primary">
+            <div class="anchor-metric-label">Γ* (Robust)</div>
+            <div class="anchor-metric-value" id="anchorGamma">—</div>
+            <div class="anchor-metric-detail">All active channels</div>
+        </div>
+        <div class="anchor-metric">
+            <div class="anchor-metric-label">Error</div>
+            <div class="anchor-metric-value" id="anchorError">—</div>
+            <div class="anchor-metric-detail">|Γ* - 1.0|</div>
+        </div>
+        <div class="anchor-metric">
+            <div class="anchor-metric-label">Public</div>
+            <div class="anchor-metric-value" id="anchorPublic">✓</div>
+            <div class="anchor-metric-detail">Math verified</div>
+        </div>
+        <div class="anchor-metric">
+            <div class="anchor-metric-label">Shared</div>
+            <div class="anchor-metric-value" id="anchorShared">1/1</div>
+            <div class="anchor-metric-detail">Core+HITL</div>
+        </div>
+        <div class="anchor-metric" id="anchorUserMetric">
+            <div class="anchor-metric-label">Users</div>
+            <div class="anchor-metric-value" id="anchorUsers">2/2</div>
+            <div class="anchor-metric-detail">Prot+Open</div>
+        </div>
+        <div class="anchor-metric" id="anchorStateMetric">
+            <div class="anchor-metric-label">State</div>
+            <div class="anchor-metric-value" id="anchorState">VALID</div>
+            <div class="anchor-metric-detail" id="anchorStateDetail">Pass/Fail</div>
+        </div>
+        <div class="anchor-metric">
+            <div class="anchor-metric-label">Noise Boost</div>
+            <div class="anchor-metric-value" id="anchorNoiseBoost">+0%</div>
+            <div class="anchor-metric-detail">Cat+Motz</div>
+        </div>
+    </div>
+</div>
+
+<!-- User Channel Panel -->
+<div class="user-channel-panel" id="userChannelPanel">
+    <h3>⟨ USER CHANNELS — DESIGNATION IMMUTABLE ⟩</h3>
+    <div class="user-grid" id="userGrid"></div>
+    <div class="corruption-controls" id="userCorruptionControls"></div>
+    <div class="resilience-stats" id="userResilienceStats"></div>
+</div>
+
+<!-- Sensor Channel Panel -->
+<div class="sensor-channel-panel" id="sensorChannelPanel">
+    <h3>⟨ SENSOR CHANNEL — SHARED DATA ⟩</h3>
+    <div class="sensor-grid" id="sensorGrid"></div>
+    <div class="corruption-controls" id="sensorCorruptionControls"></div>
+</div>
+
+<!-- Protected Math Channels Panel -->
+<div class="math-channels-panel" id="mathChannelsPanel">
+    <h3>⟨ PUBLIC MATHEMATICAL CHANNELS — VERIFIED/VERIFIABLE ⟩</h3>
+    <div class="math-grid" id="mathGrid"></div>
+</div>
+
+<!-- Gamma Clock -->
+<div class="gamma-clock" id="gammaClock">
+    <h3 id="clockTitle">⟨ 5D SELF-VERIFIED TIME ⟩</h3>
+    <div class="time-row">
+        <div class="time-block">
+            <div class="time-label">NEWTONIAN TIME (n)</div>
+            <div class="clock-display" id="clockDisplay">n = 0</div>
+        </div>
+        <div class="time-block">
+            <div class="time-label" id="ramosLabel">RAMOS TIME (Rt₅)</div>
+            <div class="ramos-time" id="ramosTimeDisplay">Rt₅ = 0</div>
+            <div class="time-delta" id="timeDelta">Δ = 0</div>
+        </div>
+    </div>
+    <div class="active-channels" id="activeChannelsDisplay">
+        <span class="public">Public: 5 ✓</span> | Shared: <span class="count">1</span> | 
+        <span class="protected-user">Prot.User: 1</span> | Open: <span class="count">1</span> | 
+        Blocked: <span class="blocked">0</span>
+    </div>
+    <div class="gamma-value" id="gammaMetrics">
+        Γ* = <span id="gammaDisplay">—</span> |
+        Ψ = <span id="psiDisplay">—</span> |
+        Ω = <span id="omegaDisplay">—</span>
+    </div>
+    <div class="verification-status" id="verificationStatus"></div>
+    <div class="gamma-lock-indicator" id="gammaLockIndicator">
+        <span class="lock-text" id="lockText">AWAITING GAMMA LOCK</span>
+    </div>
+    <div class="convergence-bar"><div class="convergence-fill" id="convergenceFill" style="width: 0%"></div></div>
+    <div class="confidence-bar"><div class="confidence-fill" id="confidenceFill" style="width: 0%"></div></div>
+    <div class="confidence-label" id="confidenceLabel">Lock Confidence: 0% (Noise: +0%)</div>
+</div>
+
+<!-- Audit Log -->
+<div class="scroll-container">
+    <table>
+        <thead id="tableHead">
+            <tr><th>n</th><th>F→φ</th><th>L→φ</th><th>C→4</th><th>M→3</th><th>P→δₛ</th><th>📡</th><th>🔐U</th><th>🌐U</th><th>Γ*</th><th>Noise</th><th>State</th></tr>
+        </thead>
+        <tbody id="log"></tbody>
+    </table>
+</div>
+
+<!-- HITL Modal -->
+<div class="hitl-overlay" id="hitlOverlay">
+    <div class="hitl-modal">
+        <h2>👤 HUMAN-IN-THE-LOOP REVIEW</h2>
+        <p>
+            Review channels. Sensor data shared with you. Protected user channels have heightened sensitivity.<br/>
+            Math channels are public and always verified.
+        </p>
+        
+        <div class="hitl-sensitivity-warning">
+            ⚠️ Protected User Channels have 2× fault sensitivity. Anomalies trigger faster blocking.
+        </div>
+        
+        <div class="hitl-section sensor">
+            <div class="hitl-section-title">📡 Shared Sensor Channel (Core + HITL Access)</div>
+            <div class="hitl-channels" id="hitlSensorChannels"></div>
+        </div>
+        
+        <div class="hitl-section user-protected">
+            <div class="hitl-section-title">🔐 Protected User Channels (Heightened Sensitivity)</div>
+            <div class="hitl-channels" id="hitlProtectedUserChannels"></div>
+        </div>
+        
+        <div class="hitl-section user-open">
+            <div class="hitl-section-title">🌐 Open User Channels (Standard Tolerance)</div>
+            <div class="hitl-channels" id="hitlOpenUserChannels"></div>
+        </div>
+        
+        <button class="close-btn" onclick="closeHITL()">Close Review Panel</button>
+    </div>
+</div>
+
+<!-- Trinity Status Modal -->
+<div class="hitl-overlay" id="trinityOverlay">
+    <div class="hitl-modal" style="border-color: var(--trinity-color);">
+        <h2 style="color: var(--trinity-color);">🔐 TRINITY PROTOCOL v4 STATUS</h2>
+        <p>
+            Security matrix defines channel access and fault tolerance.<br/>
+            Public = verified math. Shared = Core+HITL. Protected/Open User = immutable designation.
+        </p>
+        
+        <div class="hitl-section" style="border-color: var(--public-color);">
+            <div class="hitl-section-title" style="color: var(--public-color);">📊 Public Channels (Math)</div>
+            <div id="publicChannelsList"></div>
+        </div>
+        
+        <div class="hitl-section" style="border-color: var(--shared-color);">
+            <div class="hitl-section-title" style="color: var(--shared-color);">📡 Shared Channels (Sensor)</div>
+            <div id="sharedChannelsList"></div>
+        </div>
+        
+        <div class="hitl-section" style="border-color: var(--protected-user-color);">
+            <div class="hitl-section-title" style="color: var(--protected-user-color);">🔐 Protected User Channels</div>
+            <div id="protectedUserChannelsList"></div>
+        </div>
+        
+        <div class="hitl-section" style="border-color: var(--open-user-color);">
+            <div class="hitl-section-title" style="color: var(--open-user-color);">🌐 Open User Channels</div>
+            <div id="openUserChannelsList"></div>
+        </div>
+        
+        <button class="close-btn" onclick="closeTrinityPanel()">Close Trinity Panel</button>
+    </div>
+</div>
+
+<!-- User Channel Creation Modal -->
+<div class="hitl-overlay" id="userCreateOverlay">
+    <div class="hitl-modal user-create-modal">
+        <h2>+ CREATE USER CHANNEL</h2>
+        <p>
+            Create a new user channel. Designation is <strong>IMMUTABLE</strong> once created.<br/>
+            Protected channels have 2× fault sensitivity. Open channels use standard tolerance.
+        </p>
+        
+        <div class="user-create-form">
+            <input type="text" id="newUserName" placeholder="Channel Name (e.g., 'User-Alpha')" maxlength="20">
+            
+            <div class="designation-selector">
+                <button class="designation-btn protected selected" id="designationProtected" onclick="selectDesignation('protected')">
+                    🔐 PROTECTED<br/><span style="font-size:0.7em;font-weight:normal;">2× Sensitivity</span>
+                </button>
+                <button class="designation-btn open" id="designationOpen" onclick="selectDesignation('open')">
+                    🌐 OPEN<br/><span style="font-size:0.7em;font-weight:normal;">Standard</span>
+                </button>
+            </div>
+            
+            <div class="designation-warning">
+                ⚠️ Designation cannot be changed after creation!
+            </div>
+        </div>
+        
+        <button class="btn-primary" onclick="createUserChannel()" style="margin-right:10px;">Create Channel</button>
+        <button class="close-btn" onclick="closeUserCreate()">Cancel</button>
+    </div>
+</div>
+
+<div class="attribution">
+    TruthAnchor v2.0 — Trinity Protocol v4<br/>
+    Public Math • Shared Sensors • Protected/Open Users • Noise Confidence<br/>
+    Γ* = Robust Γ | Security Matrix | ❤️ 🇺🇸 × 🇧🇪 ❤️
+</div>
+
+<div class="license-badge">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0 1.0 Universal — Public Domain</a>
+    <br/>Copyright Brian Richard RAMOS — TruthAnchor v2.0 + Trinity Protocol v4
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// TRINITY PROTOCOL v4 — SECURITY MATRIX
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function sha256(data) {
+    const buffer = typeof data === 'string' 
+        ? new TextEncoder().encode(data) 
+        : data;
+    const hash = await crypto.subtle.digest('SHA-256', buffer);
+    return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function secureRandom(len = 32) {
+    const arr = new Uint8Array(len);
+    crypto.getRandomValues(arr);
+    return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Security Matrix Channel Types
+const CHANNEL_TYPES = {
+    PUBLIC: 'public',           // Math - verified/verifiable, no encryption
+    SHARED: 'shared',           // Sensor - shared with Core + HITL
+    PROTECTED_USER: 'protected-user',  // User - heightened sensitivity
+    OPEN_USER: 'open-user'      // User - standard tolerance
+};
+
+// Fault tolerance multipliers
+const FAULT_SENSITIVITY = {
+    [CHANNEL_TYPES.PUBLIC]: 0,          // No fault tolerance (always correct)
+    [CHANNEL_TYPES.SHARED]: 1.0,        // Standard
+    [CHANNEL_TYPES.PROTECTED_USER]: 2.0, // 2× sensitivity
+    [CHANNEL_TYPES.OPEN_USER]: 1.0      // Standard
+};
+
+// Trinity Channel State
+const trinityState = {
+    channels: new Map(),
+    noiseAccumulator: {
+        catalan: { samples: [], variance: 0 },
+        motzkin: { samples: [], variance: 0 }
+    },
+    noiseConfidenceBoost: 0
+};
+
+// Noise Pattern Accumulation for Catalan and Motzkin
+function accumulateNoise(sequence, currentRatio, targetRatio) {
+    const deviation = currentRatio - targetRatio;
+    const accumulator = trinityState.noiseAccumulator[sequence];
+    
+    accumulator.samples.push(deviation);
+    
+    // Keep last 100 samples for variance calculation
+    if (accumulator.samples.length > 100) {
+        accumulator.samples.shift();
+    }
+    
+    // Calculate variance (noise pattern)
+    if (accumulator.samples.length >= 10) {
+        const mean = accumulator.samples.reduce((a, b) => a + b, 0) / accumulator.samples.length;
+        const squaredDiffs = accumulator.samples.map(x => Math.pow(x - mean, 2));
+        accumulator.variance = Math.sqrt(squaredDiffs.reduce((a, b) => a + b, 0) / accumulator.samples.length);
+    }
+    
+    return accumulator.variance;
+}
+
+function calculateNoiseConfidenceBoost() {
+    const catVar = trinityState.noiseAccumulator.catalan.variance;
+    const motzVar = trinityState.noiseAccumulator.motzkin.variance;
+    const catSamples = trinityState.noiseAccumulator.catalan.samples.length;
+    const motzSamples = trinityState.noiseAccumulator.motzkin.samples.length;
+    
+    // Lower variance = higher confidence
+    // More samples = higher confidence
+    let boost = 0;
+    
+    if (catSamples >= 20 && catVar < 0.1) {
+        boost += (0.1 - catVar) * 50 * Math.min(1, catSamples / 50);
+    }
+    
+    if (motzSamples >= 20 && motzVar < 0.15) {
+        boost += (0.15 - motzVar) * 30 * Math.min(1, motzSamples / 50);
+    }
+    
+    trinityState.noiseConfidenceBoost = Math.min(15, boost); // Cap at 15%
+    return trinityState.noiseConfidenceBoost;
+}
+
+// Initialize Trinity channels with security matrix
+async function initTrinityChannels() {
+    const systemSecret = secureRandom(32);
+    
+    // PUBLIC channels - Math (verified/verifiable)
+    const publicChannels = [
+        { name: 'fibonacci', type: CHANNEL_TYPES.PUBLIC, icon: '🔢', label: 'Fibonacci' },
+        { name: 'lucas', type: CHANNEL_TYPES.PUBLIC, icon: '🔢', label: 'Lucas' },
+        { name: 'catalan', type: CHANNEL_TYPES.PUBLIC, icon: '📊', label: 'Catalan', noiseSource: true },
+        { name: 'motzkin', type: CHANNEL_TYPES.PUBLIC, icon: '📊', label: 'Motzkin', noiseSource: true },
+        { name: 'pell', type: CHANNEL_TYPES.PUBLIC, icon: '🔢', label: 'Pell' }
+    ];
+    
+    // SHARED channels - Sensor (Core + HITL)
+    const sharedChannels = [
+        { name: 'sensorInterface', type: CHANNEL_TYPES.SHARED, icon: '📡', label: 'Sensor Interface' }
+    ];
+    
+    // USER channels - Protected and Open (immutable designation)
+    const userChannels = [
+        { name: 'userProtected1', type: CHANNEL_TYPES.PROTECTED_USER, icon: '🔐', label: 'User-Protected-1' },
+        { name: 'userOpen1', type: CHANNEL_TYPES.OPEN_USER, icon: '🌐', label: 'User-Open-1' }
+    ];
+    
+    // Initialize PUBLIC channels
+    for (const ch of publicChannels) {
+        const commitment = await sha256(`PUBLIC:${ch.name}:${Date.now()}`);
+        
+        trinityState.channels.set(ch.name, {
+            ...ch,
+            commitment,
+            verified: true,
+            compromised: false,
+            health: 1.0
+        });
+    }
+    
+    // Initialize SHARED channels
+    for (const ch of sharedChannels) {
+        const sharedSecret = await sha256(`${systemSecret}:SHARED:${ch.name}`);
+        const commitment = await sha256(`SHARED_CHANNEL:${ch.name}:${sharedSecret}`);
+        
+        trinityState.channels.set(ch.name, {
+            ...ch,
+            commitment,
+            sharedSecret,
+            verified: true,
+            compromised: false,
+            health: 1.0,
+            sharedWith: ['CORE', 'HITL']
+        });
+    }
+    
+    // Initialize USER channels
+    for (const ch of userChannels) {
+        const userSecret = await sha256(`${systemSecret}:USER:${ch.type}:${ch.name}`);
+        const commitment = await sha256(`USER_CHANNEL:${ch.name}:${userSecret}`);
+        
+        trinityState.channels.set(ch.name, {
+            ...ch,
+            commitment,
+            userSecret,
+            verified: true,
+            compromised: false,
+            health: 1.0,
+            faultSensitivity: FAULT_SENSITIVITY[ch.type],
+            immutableDesignation: true
+        });
+    }
+    
+    updateTrinityUI();
+}
+
+// Create new user channel with immutable designation
+async function createNewUserChannel(name, isProtected) {
+    const type = isProtected ? CHANNEL_TYPES.PROTECTED_USER : CHANNEL_TYPES.OPEN_USER;
+    const icon = isProtected ? '🔐' : '🌐';
+    const channelName = `user_${name.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}`;
+    
+    const systemSecret = secureRandom(32);
+    const userSecret = await sha256(`${systemSecret}:USER:${type}:${channelName}`);
+    const commitment = await sha256(`USER_CHANNEL:${channelName}:${userSecret}`);
+    
+    trinityState.channels.set(channelName, {
+        name: channelName,
+        type,
+        icon,
+        label: name,
+        commitment,
+        userSecret,
+        verified: true,
+        compromised: false,
+        health: 1.0,
+        faultSensitivity: FAULT_SENSITIVITY[type],
+        immutableDesignation: true,
+        createdAt: Date.now()
+    });
+    
+    // Initialize state
+    interfaceHealth[channelName] = 1.0;
+    interfaceStableCount[channelName] = 0;
+    interfaceBlocked[channelName] = false;
+    interfaceCorruption[channelName] = false;
+    interfaceErrors[channelName] = 0;
+    hitlApprovals[channelName] = false;
+    
+    updateTrinityUI();
+    buildUserPanel();
+    buildChannelArcs();
+    
+    return channelName;
+}
+
+// Update channel with security matrix rules
+async function updateChannelHealth(channelName, value) {
+    const channel = trinityState.channels.get(channelName);
+    if (!channel) return;
+    
+    // PUBLIC channels are always verified (math is always correct)
+    if (channel.type === CHANNEL_TYPES.PUBLIC) {
+        channel.verified = true;
+        channel.compromised = false;
+        channel.health = 1.0;
+        return;
+    }
+    
+    const target = 1.0;
+    const error = Math.abs(value - target) / target;
+    const sensitivity = channel.faultSensitivity || 1.0;
+    
+    // Apply fault sensitivity multiplier
+    const adjustedError = error * sensitivity;
+    
+    if (adjustedError > 0.5) {
+        channel.compromised = true;
+        channel.verified = false;
+    } else {
+        channel.verified = true;
+        channel.compromised = false;
+    }
+    
+    channel.health = Math.max(0, 1 - adjustedError);
+}
+
+// Get channels by type
+function getChannelsByType(type) {
+    return [...trinityState.channels.values()].filter(ch => ch.type === type);
+}
+
+function getActiveChannelsByType(type) {
+    return [...trinityState.channels.entries()]
+        .filter(([name, ch]) => ch.type === type && !interfaceBlocked[name])
+        .map(([name]) => name);
+}
+
+// Build Trinity UI
+function updateTrinityUI() {
+    const grid = document.getElementById('trinityGrid');
+    let html = '';
+    
+    trinityState.channels.forEach((ch, name) => {
+        const verifiedClass = ch.verified ? 'verified' : '';
+        const compromisedClass = ch.compromised ? 'compromised' : '';
+        
+        let typeClass = ch.type;
+        let statusText = ch.verified ? '✓ VERIFIED' : 
+                        ch.compromised ? '⚠ COMPROMISED' : '○ PENDING';
+        
+        if (ch.type === CHANNEL_TYPES.PUBLIC) {
+            statusText = '✓ PUBLIC';
+        }
+        
+        html += `
+            <div class="trinity-channel ${typeClass} ${verifiedClass} ${compromisedClass}">
+                <div class="trinity-channel-icon">${ch.icon}</div>
+                <div class="trinity-channel-name">${ch.label}</div>
+                <div class="trinity-channel-type">${ch.type.replace('-', ' ')}</div>
+                <div class="trinity-channel-status">${statusText}</div>
+                ${ch.noiseSource ? '<div class="trinity-noise-badge">📊 Noise Source</div>' : ''}
+                <div class="trinity-commitment">${ch.commitment.slice(0, 10)}...</div>
+            </div>
+        `;
+    });
+    
+    grid.innerHTML = html;
+    
+    // Update stats
+    const publicCount = getChannelsByType(CHANNEL_TYPES.PUBLIC).length;
+    const sharedCount = getChannelsByType(CHANNEL_TYPES.SHARED).length;
+    const protectedUserCount = getChannelsByType(CHANNEL_TYPES.PROTECTED_USER).length;
+    const openUserCount = getChannelsByType(CHANNEL_TYPES.OPEN_USER).length;
+    const compromisedCount = [...trinityState.channels.values()].filter(c => c.compromised).length;
+    
+    document.getElementById('trinityPublic').textContent = publicCount;
+    document.getElementById('trinityShared').textContent = sharedCount;
+    document.getElementById('trinityProtectedUser').textContent = protectedUserCount;
+    document.getElementById('trinityOpenUser').textContent = openUserCount;
+    document.getElementById('trinityCompromised').textContent = compromisedCount;
+}
+
+function updateNoiseDisplay() {
+    const catAcc = trinityState.noiseAccumulator.catalan;
+    const motzAcc = trinityState.noiseAccumulator.motzkin;
+    
+    document.getElementById('catalanNoise').textContent = `σ = ${catAcc.variance.toFixed(6)}`;
+    document.getElementById('catalanSamples').textContent = `Samples: ${catAcc.samples.length}`;
+    
+    document.getElementById('motzkinNoise').textContent = `σ = ${motzAcc.variance.toFixed(6)}`;
+    document.getElementById('motzkinSamples').textContent = `Samples: ${motzAcc.samples.length}`;
+    
+    const boost = trinityState.noiseConfidenceBoost;
+    document.getElementById('noiseConfidenceBoost').textContent = `+${boost.toFixed(2)}%`;
+    document.getElementById('noiseConfidenceBoost').style.color = 
+        boost > 10 ? 'var(--accent-green)' : boost > 5 ? 'var(--accent-yellow)' : 'var(--text-secondary)';
+    
+    document.getElementById('anchorNoiseBoost').textContent = `+${boost.toFixed(0)}%`;
+}
+
+function openTrinityPanel() {
+    // Build lists for each channel type
+    const buildList = (channels, containerId) => {
+        const container = document.getElementById(containerId);
+        let html = '';
+        channels.forEach(ch => {
+            const statusColor = ch.compromised ? 'var(--accent-red)' : 
+                               ch.verified ? 'var(--accent-green)' : 'var(--accent-yellow)';
+            html += `
+                <div style="background: var(--bg-tertiary); padding: 6px; border-radius: 4px; margin-bottom: 4px; font-size: 0.7em;">
+                    <div style="font-weight: bold;">${ch.icon} ${ch.label}</div>
+                    <div style="font-family: monospace; font-size: 0.8em; color: var(--text-muted);">
+                        ${ch.commitment.slice(0, 20)}...
+                    </div>
+                    <div style="color: ${statusColor}; font-size: 0.8em;">
+                        ${ch.verified ? '✓ Verified' : ch.compromised ? '⚠ Compromised' : '○ Pending'}
+                        ${ch.faultSensitivity > 1 ? ` [${ch.faultSensitivity}× Sensitivity]` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html || '<div style="color: var(--text-muted); font-size: 0.7em;">None</div>';
+    };
+    
+    buildList(getChannelsByType(CHANNEL_TYPES.PUBLIC), 'publicChannelsList');
+    buildList(getChannelsByType(CHANNEL_TYPES.SHARED), 'sharedChannelsList');
+    buildList(getChannelsByType(CHANNEL_TYPES.PROTECTED_USER), 'protectedUserChannelsList');
+    buildList(getChannelsByType(CHANNEL_TYPES.OPEN_USER), 'openUserChannelsList');
+    
+    document.getElementById('trinityOverlay').classList.add('active');
+}
+
+function closeTrinityPanel() {
+    document.getElementById('trinityOverlay').classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MATHEMATICAL CONSTANTS
+// ═══════════════════════════════════════════════════════════════════════════
+
+const PHI = (1 + Math.sqrt(5)) / 2;
+const SILVER_RATIO = 1 + Math.sqrt(2);
+const PI = Math.PI;
+
+const ZETA_EVEN = {
+    2: (PI * PI) / 6,
+    4: (PI ** 4) / 90,
+    6: (PI ** 6) / 945
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHANNEL ARCHITECTURE
+// ═══════════════════════════════════════════════════════════════════════════
+
+const INTERFACE_CONFIG = {
+    healthDecay: 0.08,
+    healthRecover: 0.015,
+    blockThreshold: 0.20,
+    suspectThreshold: 0.55,
+    recoverySteps: 25,
+    recoveryHealthStart: 0.55,
+    anomalyMultiplier: 2.8,
+    corruptionNoiseRange: 2.5,
+    protectedSensitivityMultiplier: 2.0
+};
+
+let interfaceHealth = {};
+let interfaceStableCount = {};
+let interfaceBlocked = {};
+let interfaceCorruption = {};
+let interfaceErrors = {};
+let hitlApprovals = {};
+
+const MATH_INFO = {
+    fib: { label: 'Fibonacci', symbol: 'F→φ', color: '#aa66ff', targetStr: 'φ' },
+    luc: { label: 'Lucas', symbol: 'L→φ', color: '#66ffaa', targetStr: 'φ' },
+    cat: { label: 'Catalan', symbol: 'C→4', color: '#ffaa66', targetStr: '4', noiseSource: true },
+    motz: { label: 'Motzkin', symbol: 'M→3', color: '#66aaff', targetStr: '3', noiseSource: true },
+    pell: { label: 'Pell', symbol: 'P→δₛ', color: '#ff66aa', targetStr: 'δₛ' },
+    zeta2: { label: 'ζ(2)', symbol: 'ζ₂', color: '#ffff66', targetStr: 'π²/6' },
+    zeta4: { label: 'ζ(4)', symbol: 'ζ₄', color: '#ff88ff', targetStr: 'π⁴/90' },
+    zeta6: { label: 'ζ(6)', symbol: 'ζ₆', color: '#88ffff', targetStr: 'π⁶/945' }
+};
+
+function getAuditedChannels() {
+    return [...trinityState.channels.entries()]
+        .filter(([name, ch]) => ch.type !== CHANNEL_TYPES.PUBLIC)
+        .map(([name]) => name);
+}
+
+function getUserChannels() {
+    return [...trinityState.channels.entries()]
+        .filter(([name, ch]) => ch.type === CHANNEL_TYPES.PROTECTED_USER || ch.type === CHANNEL_TYPES.OPEN_USER)
+        .map(([name, ch]) => ({ name, ...ch }));
+}
+
+function getSensorChannels() {
+    return [...trinityState.channels.entries()]
+        .filter(([name, ch]) => ch.type === CHANNEL_TYPES.SHARED)
+        .map(([name, ch]) => ({ name, ...ch }));
+}
+
+function initInterfaceState() {
+    interfaceHealth = {};
+    interfaceStableCount = {};
+    interfaceBlocked = {};
+    interfaceCorruption = {};
+    interfaceErrors = {};
+    hitlApprovals = {};
+    
+    getAuditedChannels().forEach(ch => {
+        interfaceHealth[ch] = 1.0;
+        interfaceStableCount[ch] = 0;
+        interfaceBlocked[ch] = false;
+        interfaceCorruption[ch] = false;
+        interfaceErrors[ch] = 0;
+        hitlApprovals[ch] = false;
+    });
+}
+
+function simulateInterfaceValue(ch) {
+    if (interfaceCorruption[ch]) {
+        const noise = 0.3 + Math.random() * INTERFACE_CONFIG.corruptionNoiseRange;
+        return noise;
+    }
+    return 0.98 + Math.random() * 0.04;
+}
+
+function getChannelFaultSensitivity(ch) {
+    const channel = trinityState.channels.get(ch);
+    return channel?.faultSensitivity || 1.0;
+}
+
+async function updateInterfaceHealth(ch, value) {
+    const channel = trinityState.channels.get(ch);
+    if (!channel || channel.type === CHANNEL_TYPES.PUBLIC) return;
+    
+    const target = 1.0;
+    const error = Math.abs(value - target) / target;
+    const sensitivity = getChannelFaultSensitivity(ch);
+    
+    // Apply sensitivity multiplier for fault detection
+    const adjustedError = error * sensitivity;
+    interfaceErrors[ch] = adjustedError;
+    
+    const passed = adjustedError < 0.15;
+    
+    // Decay/recovery thresholds adjusted by sensitivity
+    const adjustedBlockThreshold = INTERFACE_CONFIG.blockThreshold / sensitivity;
+    const adjustedDecay = INTERFACE_CONFIG.healthDecay * sensitivity;
+    
+    if (interfaceBlocked[ch]) {
+        if (!interfaceCorruption[ch] && passed) {
+            interfaceStableCount[ch]++;
+            const hitlBonus = hitlApprovals[ch] ? 5 : 0;
+            
+            if (interfaceStableCount[ch] >= INTERFACE_CONFIG.recoverySteps - hitlBonus) {
+                interfaceBlocked[ch] = false;
+                interfaceHealth[ch] = INTERFACE_CONFIG.recoveryHealthStart;
+                interfaceStableCount[ch] = 0;
+                hitlApprovals[ch] = false;
+                
+                await updateChannelHealth(ch, value);
+            }
+        } else {
+            interfaceStableCount[ch] = Math.max(0, interfaceStableCount[ch] - 2);
+        }
+        return;
+    }
+    
+    if (passed) {
+        interfaceHealth[ch] = Math.min(1, interfaceHealth[ch] + INTERFACE_CONFIG.healthRecover);
+        interfaceStableCount[ch]++;
+    } else {
+        interfaceHealth[ch] = Math.max(0, interfaceHealth[ch] - adjustedDecay);
+        interfaceStableCount[ch] = 0;
+    }
+    
+    if (interfaceHealth[ch] < adjustedBlockThreshold) {
+        interfaceBlocked[ch] = true;
+        interfaceStableCount[ch] = 0;
+    }
+    
+    await updateChannelHealth(ch, value);
+}
+
+function getInterfaceStatus(ch) {
+    if (interfaceBlocked[ch]) {
+        return interfaceStableCount[ch] > 0 ? 'recovering' : 'blocked';
+    }
+    if (interfaceHealth[ch] < INTERFACE_CONFIG.suspectThreshold) {
+        return 'suspect';
+    }
+    return 'healthy';
+}
+
+function getActiveInterfaces() {
+    return getAuditedChannels().filter(ch => !interfaceBlocked[ch]);
+}
+
+function getInterfaceSystemHealth() {
+    const channels = getAuditedChannels();
+    if (channels.length === 0) return 1;
+    const healthSum = channels.reduce((sum, ch) => 
+        sum + (interfaceBlocked[ch] ? 0 : interfaceHealth[ch]), 0);
+    return healthSum / channels.length;
+}
+
+// Check if any protected user channel is compromised (critical state)
+function hasProtectedUserAnomaly() {
+    return [...trinityState.channels.entries()]
+        .filter(([name, ch]) => ch.type === CHANNEL_TYPES.PROTECTED_USER)
+        .some(([name]) => interfaceBlocked[name] || getInterfaceStatus(name) === 'suspect');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CORRUPTION & CHAOS
+// ═══════════════════════════════════════════════════════════════════════════
+
+function toggleInterfaceCorruption(ch) {
+    interfaceCorruption[ch] = !interfaceCorruption[ch];
+    if (!interfaceCorruption[ch] && interfaceBlocked[ch]) {
+        interfaceStableCount[ch] = 0;
+    }
+    updateCorruptionControls();
+}
+
+function injectChaos() {
+    const auditedChannels = getAuditedChannels();
+    if (auditedChannels.length === 0) return;
+    const ch = auditedChannels[Math.floor(Math.random() * auditedChannels.length)];
+    if (!interfaceCorruption[ch]) {
+        interfaceCorruption[ch] = true;
+    }
+    updateCorruptionControls();
+}
+
+function clearAllCorruption() {
+    getAuditedChannels().forEach(ch => {
+        interfaceCorruption[ch] = false;
+    });
+    updateCorruptionControls();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HITL
+// ═══════════════════════════════════════════════════════════════════════════
+
+function openHITL() {
+    // Sensor channels (shared with HITL)
+    const sensorContainer = document.getElementById('hitlSensorChannels');
+    let sensorHtml = '';
+    getSensorChannels().forEach(ch => {
+        const status = getInterfaceStatus(ch.name);
+        const isReviewable = status === 'blocked' || status === 'recovering';
+        sensorHtml += `
+            <div class="hitl-channel-item">
+                <span class="name">${ch.icon} ${ch.label} [SHARED]</span>
+                <span class="status ${status}">${status.toUpperCase()}</span>
+                <button onclick="approveRecovery('${ch.name}')" ${!isReviewable || hitlApprovals[ch.name] ? 'disabled' : ''}>
+                    ${hitlApprovals[ch.name] ? '✓' : 'Approve'}
+                </button>
+            </div>
+        `;
+    });
+    sensorContainer.innerHTML = sensorHtml || '<p style="color:#888;font-size:0.7em;">No sensor channels</p>';
+    
+    // Protected user channels
+    const protectedContainer = document.getElementById('hitlProtectedUserChannels');
+    let protectedHtml = '';
+    getUserChannels().filter(ch => ch.type === CHANNEL_TYPES.PROTECTED_USER).forEach(ch => {
+        const status = getInterfaceStatus(ch.name);
+        const isReviewable = status === 'blocked' || status === 'recovering';
+        protectedHtml += `
+            <div class="hitl-channel-item">
+                <span class="name">${ch.icon} ${ch.label} [2× SENS]</span>
+                <span class="status ${status}">${status.toUpperCase()}</span>
+                <button onclick="approveRecovery('${ch.name}')" ${!isReviewable || hitlApprovals[ch.name] ? 'disabled' : ''}>
+                    ${hitlApprovals[ch.name] ? '✓' : 'Approve'}
+                </button>
+            </div>
+        `;
+    });
+    protectedContainer.innerHTML = protectedHtml || '<p style="color:#888;font-size:0.7em;">No protected user channels</p>';
+    
+    // Open user channels
+    const openContainer = document.getElementById('hitlOpenUserChannels');
+    let openHtml = '';
+    getUserChannels().filter(ch => ch.type === CHANNEL_TYPES.OPEN_USER).forEach(ch => {
+        const status = getInterfaceStatus(ch.name);
+        const isReviewable = status === 'blocked' || status === 'recovering';
+        openHtml += `
+            <div class="hitl-channel-item">
+                <span class="name">${ch.icon} ${ch.label}</span>
+                <span class="status ${status}">${status.toUpperCase()}</span>
+                <button onclick="approveRecovery('${ch.name}')" ${!isReviewable || hitlApprovals[ch.name] ? 'disabled' : ''}>
+                    ${hitlApprovals[ch.name] ? '✓' : 'Approve'}
+                </button>
+            </div>
+        `;
+    });
+    openContainer.innerHTML = openHtml || '<p style="color:#888;font-size:0.7em;">No open user channels</p>';
+    
+    document.getElementById('hitlOverlay').classList.add('active');
+}
+
+function closeHITL() {
+    document.getElementById('hitlOverlay').classList.remove('active');
+}
+
+function approveRecovery(ch) {
+    hitlApprovals[ch] = true;
+    openHITL();
+}
+
+// User channel creation
+let selectedDesignation = 'protected';
+
+function openUserCreate() {
+    document.getElementById('newUserName').value = '';
+    selectDesignation('protected');
+    document.getElementById('userCreateOverlay').classList.add('active');
+}
+
+function closeUserCreate() {
+    document.getElementById('userCreateOverlay').classList.remove('active');
+}
+
+function selectDesignation(type) {
+    selectedDesignation = type;
+    document.getElementById('designationProtected').classList.toggle('selected', type === 'protected');
+    document.getElementById('designationOpen').classList.toggle('selected', type === 'open');
+}
+
+async function createUserChannel() {
+    const name = document.getElementById('newUserName').value.trim();
+    if (!name) {
+        alert('Please enter a channel name');
+        return;
+    }
+    
+    await createNewUserChannel(name, selectedDesignation === 'protected');
+    closeUserCreate();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// UI UPDATES
+// ═══════════════════════════════════════════════════════════════════════════
+
+function buildUserPanel() {
+    const grid = document.getElementById('userGrid');
+    let html = '';
+    
+    getUserChannels().forEach(ch => {
+        const isProtected = ch.type === CHANNEL_TYPES.PROTECTED_USER;
+        const status = getInterfaceStatus(ch.name);
+        const health = interfaceHealth[ch.name] || 1;
+        const error = interfaceErrors[ch.name] || 0;
+        const healthColor = health > 0.7 ? '#44ff88' : health > 0.4 ? '#ffaa00' : '#ff4444';
+        
+        html += `
+            <div class="user-item ${isProtected ? 'protected' : 'open'} ${status}" id="user-${ch.name}">
+                <div class="user-icon">${ch.icon}</div>
+                <div class="user-name">${ch.label}</div>
+                <div class="user-designation">${isProtected ? '🔐 PROTECTED' : '🌐 OPEN'}</div>
+                <div class="user-status">${status === 'healthy' ? '● HEALTHY' : status === 'blocked' ? '✗ BLOCKED' : status === 'recovering' ? '↻ RECOVERING' : '⚠ SUSPECT'}</div>
+                <div class="user-health-bar">
+                    <div class="user-health-fill" style="width:${health*100}%;background:${healthColor};"></div>
+                </div>
+                <div class="user-metrics">H: ${(health*100).toFixed(0)}% | E: ${(error*100).toFixed(1)}%</div>
+                ${isProtected ? '<div class="user-sensitivity">⚡ 2× Fault Sensitivity</div>' : ''}
+            </div>
+        `;
+    });
+    
+    grid.innerHTML = html;
+    updateCorruptionControls();
+    updateResilienceStats();
+}
+
+function buildSensorPanel() {
+    const grid = document.getElementById('sensorGrid');
+    let html = '';
+    
+    getSensorChannels().forEach(ch => {
+        const status = getInterfaceStatus(ch.name);
+        const health = interfaceHealth[ch.name] || 1;
+        const healthColor = health > 0.7 ? '#44ff88' : health > 0.4 ? '#ffaa00' : '#ff4444';
+        
+        html += `
+            <div class="sensor-item ${status}" id="sensor-${ch.name}">
+                <div class="sensor-icon">${ch.icon}</div>
+                <div class="sensor-name">${ch.label}</div>
+                <div class="sensor-shared-badge">📤 Shared: Core + HITL</div>
+                <div class="sensor-status">${status === 'healthy' ? '● HEALTHY' : status === 'blocked' ? '✗ BLOCKED' : status === 'recovering' ? '↻ RECOVERING' : '⚠ SUSPECT'}</div>
+                <div class="sensor-health-bar">
+                    <div class="sensor-health-fill" style="width:${health*100}%;background:${healthColor};"></div>
+                </div>
+                <div class="sensor-metrics">Health: ${(health*100).toFixed(0)}%</div>
+            </div>
+        `;
+    });
+    
+    grid.innerHTML = html;
+    
+    // Sensor corruption controls
+    const controls = document.getElementById('sensorCorruptionControls');
+    let controlsHtml = '<span style="font-size:0.6em;color:#888;margin-right:8px;">COMPROMISE:</span>';
+    getSensorChannels().forEach(ch => {
+        const isCorrupt = interfaceCorruption[ch.name];
+        controlsHtml += `<button class="corrupt-btn ${isCorrupt ? 'active' : ''}" onclick="toggleInterfaceCorruption('${ch.name}')">${isCorrupt ? '✗' : '⚡'} ${ch.icon}</button>`;
+    });
+    controls.innerHTML = controlsHtml;
+}
+
+function buildChannelArcs() {
+    const container = document.getElementById('channelArcs');
+    let html = '';
+    
+    // Public math (always 100%)
+    html += `
+        <div class="channel-arc-item public">
+            <span class="channel-arc-name">MATH</span>
+            <div class="channel-arc-bar">
+                <div class="channel-arc-fill" style="width:100%;background:var(--public-color);"></div>
+            </div>
+            <span class="channel-arc-value" style="color:var(--public-color);">✓</span>
+        </div>
+    `;
+    
+    // Shared sensor
+    getSensorChannels().forEach(ch => {
+        const health = interfaceHealth[ch.name] || 1;
+        const healthColor = health > 0.7 ? '#44ff88' : health > 0.4 ? '#ffaa00' : '#ff4444';
+        html += `
+            <div class="channel-arc-item shared">
+                <span class="channel-arc-name">📡</span>
+                <div class="channel-arc-bar">
+                    <div class="channel-arc-fill" id="arc-${ch.name}" style="width:${health*100}%;background:${healthColor};"></div>
+                </div>
+                <span class="channel-arc-value" id="arc-val-${ch.name}" style="color:${healthColor}">${(health*100).toFixed(0)}</span>
+            </div>
+        `;
+    });
+    
+    // User channels
+    getUserChannels().forEach(ch => {
+        const isProtected = ch.type === CHANNEL_TYPES.PROTECTED_USER;
+        const health = interfaceHealth[ch.name] || 1;
+        const healthColor = health > 0.7 ? '#44ff88' : health > 0.4 ? '#ffaa00' : '#ff4444';
+        html += `
+            <div class="channel-arc-item ${isProtected ? 'protected-user' : 'open-user'}">
+                <span class="channel-arc-name">${ch.icon}</span>
+                <div class="channel-arc-bar">
+                    <div class="channel-arc-fill" id="arc-${ch.name}" style="width:${health*100}%;background:${healthColor};"></div>
+                </div>
+                <span class="channel-arc-value" id="arc-val-${ch.name}" style="color:${healthColor}">${(health*100).toFixed(0)}</span>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function updateCorruptionControls() {
+    // User corruption controls
+    const userControls = document.getElementById('userCorruptionControls');
+    let html = '<span style="font-size:0.6em;color:#888;margin-right:8px;">COMPROMISE:</span>';
+    
+    getUserChannels().forEach(ch => {
+        const isCorrupt = interfaceCorruption[ch.name];
+        html += `<button class="corrupt-btn ${isCorrupt ? 'active' : ''}" onclick="toggleInterfaceCorruption('${ch.name}')">${isCorrupt ? '✗' : '⚡'} ${ch.icon}</button>`;
+    });
+    
+    html += `<button class="corrupt-btn clear" onclick="clearAllCorruption()">↻ CLEAR</button>`;
+    html += `<span style="font-size:0.5em;color:var(--public-color);margin-left:10px;">📊 Math always verified</span>`;
+    
+    userControls.innerHTML = html;
+    
+    // Also update sensor controls
+    buildSensorPanel();
+}
+
+function updateResilienceStats() {
+    const stats = document.getElementById('userResilienceStats');
+    
+    const protectedUsers = getUserChannels().filter(ch => ch.type === CHANNEL_TYPES.PROTECTED_USER);
+    const openUsers = getUserChannels().filter(ch => ch.type === CHANNEL_TYPES.OPEN_USER);
+    const activeProtected = protectedUsers.filter(ch => !interfaceBlocked[ch.name]).length;
+    const activeOpen = openUsers.filter(ch => !interfaceBlocked[ch.name]).length;
+    const blockedUsers = getUserChannels().filter(ch => interfaceBlocked[ch.name]).length;
+    const hasProtectedIssue = hasProtectedUserAnomaly();
+    
+    stats.innerHTML = `
+        <div class="resilience-stat ${hasProtectedIssue ? 'critical' : ''}">
+            <div class="resilience-stat-label">Prot. Users</div>
+            <div class="resilience-stat-value">${activeProtected}/${protectedUsers.length}</div>
+        </div>
+        <div class="resilience-stat">
+            <div class="resilience-stat-label">Open Users</div>
+            <div class="resilience-stat-value">${activeOpen}/${openUsers.length}</div>
+        </div>
+        <div class="resilience-stat ${blockedUsers > 0 ? 'warning' : ''}">
+            <div class="resilience-stat-label">Blocked</div>
+            <div class="resilience-stat-value">${blockedUsers}</div>
+        </div>
+        <div class="resilience-stat">
+            <div class="resilience-stat-label">Noise Boost</div>
+            <div class="resilience-stat-value">+${trinityState.noiseConfidenceBoost.toFixed(1)}%</div>
+        </div>
+    `;
+}
+
+function updateHealthRing(health) {
+    const fill = document.getElementById('healthRingFill');
+    const value = document.getElementById('systemHealthValue');
+    
+    const circumference = 2 * Math.PI * 65;
+    const offset = circumference * (1 - health);
+    
+    fill.style.strokeDashoffset = offset;
+    
+    const color = health > 0.7 ? '#44ff88' : health > 0.4 ? '#ffaa00' : '#ff4444';
+    fill.style.stroke = color;
+    
+    value.textContent = `${(health * 100).toFixed(0)}%`;
+    value.style.color = color;
+}
+
+function updateSystemStateBanner(state, detail) {
+    const banner = document.getElementById('systemStateBanner');
+    const label = document.getElementById('stateLabel');
+    const detailEl = document.getElementById('stateDetail');
+    
+    banner.className = `system-state-banner ${state}`;
+    
+    const stateLabels = {
+        valid: 'SYSTEM VALID',
+        degraded: 'CHANNEL DEGRADED',
+        critical: '⚠️ PROTECTED USER ANOMALY',
+        invalid: 'SYSTEM INVALID',
+        locked: '✓ GAMMA LOCKED — TRUTH VERIFIED'
+    };
+    
+    label.textContent = stateLabels[state] || state.toUpperCase();
+    detailEl.textContent = detail;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DIMENSION CONFIG
+// ═══════════════════════════════════════════════════════════════════════════
+
+const DIMENSION_CONFIG = {
+    5: { name: 'Pentadimensional', mathSequences: ['fib', 'luc', 'cat', 'motz', 'pell'],
+         targets: { fib: PHI, luc: PHI, cat: 4, motz: 3, pell: SILVER_RATIO },
+         delta: 0.375, symbol: 'Γ*₅', rtSymbol: 'Rt₅' },
+    6: { name: 'Hexadimensional', mathSequences: ['fib', 'luc', 'cat', 'motz', 'pell', 'zeta2'],
+         targets: { fib: PHI, luc: PHI, cat: 4, motz: 3, pell: SILVER_RATIO, zeta2: ZETA_EVEN[2] },
+         delta: 0.1875, symbol: 'Γ*₆', rtSymbol: 'Rt₆' },
+    7: { name: 'Heptadimensional', mathSequences: ['fib', 'luc', 'cat', 'motz', 'pell', 'zeta2', 'zeta4'],
+         targets: { fib: PHI, luc: PHI, cat: 4, motz: 3, pell: SILVER_RATIO, zeta2: ZETA_EVEN[2], zeta4: ZETA_EVEN[4] },
+         delta: 0.09375, symbol: 'Γ*₇', rtSymbol: 'Rt₇' },
+    8: { name: 'Octadimensional', mathSequences: ['fib', 'luc', 'cat', 'motz', 'pell', 'zeta2', 'zeta4', 'zeta6'],
+         targets: { fib: PHI, luc: PHI, cat: 4, motz: 3, pell: SILVER_RATIO, zeta2: ZETA_EVEN[2], zeta4: ZETA_EVEN[4], zeta6: ZETA_EVEN[6] },
+         delta: 0.046875, symbol: 'Γ*₈', rtSymbol: 'Rt₈' },
+    9: { name: 'Nonadimensional', mathSequences: ['fib', 'luc', 'cat', 'motz', 'pell', 'zeta2', 'zeta4', 'zeta6'],
+         targets: { fib: PHI, luc: PHI, cat: 4, motz: 3, pell: SILVER_RATIO, zeta2: ZETA_EVEN[2], zeta4: ZETA_EVEN[4], zeta6: ZETA_EVEN[6] },
+         delta: 0.0234375, symbol: 'Γ*₉', rtSymbol: 'Rt₉' }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════
+
+let currentDimension = 5;
+let running = false;
+let n = 2;
+
+let fPrevPrev = 1n, fPrev = 1n, fCurr = 2n;
+let lPrevPrev = 1n, lPrev = 3n, lCurr = 4n;
+let cPrev = 1n, cCurr = 1n;
+let motzkinMemo = [1n, 1n, 2n, 4n, 9n, 21n];
+let mPrevPrev = 4n, mPrev = 9n, mCurr = 21n;
+let pPrevPrev = 1n, pPrev = 2n, pCurr = 5n;
+
+let zetaSums = { 2: 0, 4: 0, 6: 0 };
+
+let emaGamma = 1.0;
+const EMA_ALPHA = 0.15;
+let lockStability = 0;
+let gammaHistory = [];
+let gammaLocked = false;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SEQUENCE STEPPING
+// ═══════════════════════════════════════════════════════════════════════════
+
+function fibStep() { const next = fPrev + fCurr; fPrevPrev = fPrev; fPrev = fCurr; fCurr = next; }
+function lucStep() { const next = lPrev + lCurr; lPrevPrev = lPrev; lPrev = lCurr; lCurr = next; }
+function catStep() { const num = cCurr * BigInt(2 * (2 * n + 1)); const den = BigInt(n + 2); cPrev = cCurr; cCurr = num / den; }
+function motzkinStep() {
+    const nBig = BigInt(n);
+    const num = (2n * nBig + 1n) * mCurr + (3n * nBig - 3n) * mPrev;
+    const next = num / (nBig + 2n);
+    motzkinMemo.push(next);
+    if (motzkinMemo.length > 100) motzkinMemo = motzkinMemo.slice(-50);
+    mPrevPrev = mPrev; mPrev = mCurr; mCurr = next;
+}
+function pellStep() { const next = 2n * pCurr + pPrev; pPrevPrev = pPrev; pPrev = pCurr; pCurr = next; }
+function zetaStep() { const k = n + 1; zetaSums[2] += 1/(k*k); zetaSums[4] += 1/Math.pow(k,4); zetaSums[6] += 1/Math.pow(k,6); }
+
+function preciseRatio(a, b) {
+    if (b === 0n) return 1;
+    const sa = a.toString(), sb = b.toString();
+    const precision = Math.min(15, Math.min(sa.length, sb.length));
+    const aVal = Number(sa.slice(0, precision));
+    const bVal = Number(sb.slice(0, precision));
+    return (aVal / bVal) * Math.pow(10, sa.length - sb.length);
+}
+
+function acceleratedMotzkinRatio(motzR) {
+    if (motzkinMemo.length < 4) return motzR;
+    const len = motzkinMemo.length;
+    const r1 = Number(motzkinMemo[len-1]) / Number(motzkinMemo[len-2]);
+    const r2 = Number(motzkinMemo[len-2]) / Number(motzkinMemo[len-3]);
+    const r3 = Number(motzkinMemo[len-3]) / Number(motzkinMemo[len-4]);
+    const denom = r1 - 2*r2 + r3;
+    if (Math.abs(denom) < 1e-15) return motzR;
+    const acc = r1 - ((r1 - r2) ** 2) / denom;
+    return (acc > 0 && acc < 10 && !isNaN(acc)) ? acc : motzR;
+}
+
+function getTolerance(n) {
+    const base = Math.max(1, Math.log10(n));
+    return { fib: 1e-8/base, luc: 1e-8/base, cat: 0.01/(base*0.5), motz: 0.05/(base*0.4), pell: 1e-8/base,
+             zeta2: 0.001/base, zeta4: 0.0005/base, zeta6: 0.0002/base, gamma: 0.01/base };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN STEP
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function step() {
+    fibStep(); lucStep(); catStep(); motzkinStep(); pellStep(); zetaStep();
+    n++;
+
+    const config = DIMENSION_CONFIG[currentDimension];
+    const targets = config.targets;
+    const tol = getTolerance(n);
+    
+    // PUBLIC math ratios (always correct, verified)
+    const mathRatios = {
+        fib: preciseRatio(fCurr, fPrev),
+        luc: preciseRatio(lCurr, lPrev),
+        cat: preciseRatio(cCurr, cPrev),
+        motz: acceleratedMotzkinRatio(preciseRatio(mCurr, mPrev)),
+        pell: preciseRatio(pCurr, pPrev),
+        zeta2: zetaSums[2],
+        zeta4: zetaSums[4],
+        zeta6: zetaSums[6]
+    };
+    
+    // Accumulate noise from Catalan and Motzkin
+    accumulateNoise('catalan', mathRatios.cat, targets.cat);
+    accumulateNoise('motzkin', mathRatios.motz, targets.motz);
+    calculateNoiseConfidenceBoost();
+    updateNoiseDisplay();
+    
+    // Interface values (can be corrupted)
+    const interfaceValues = {};
+    for (const ch of getAuditedChannels()) {
+        interfaceValues[ch] = simulateInterfaceValue(ch);
+        await updateInterfaceHealth(ch, interfaceValues[ch]);
+    }
+    
+    const interfaceSystemHealth = getInterfaceSystemHealth();
+    updateHealthRing(interfaceSystemHealth);
+    
+    const activeInterfaces = getActiveInterfaces();
+    const blockedCount = getAuditedChannels().filter(ch => interfaceBlocked[ch]).length;
+    const protectedAnomaly = hasProtectedUserAnomaly();
+    
+    // Update UI panels
+    buildUserPanel();
+    buildSensorPanel();
+    
+    // Update arc values
+    getAuditedChannels().forEach(ch => {
+        const health = interfaceHealth[ch];
+        const healthColor = health > 0.7 ? '#44ff88' : health > 0.4 ? '#ffaa00' : '#ff4444';
+        const arcFill = document.getElementById(`arc-${ch}`);
+        const arcVal = document.getElementById(`arc-val-${ch}`);
+        if (arcFill) {
+            arcFill.style.width = `${health * 100}%`;
+            arcFill.style.background = healthColor;
+        }
+        if (arcVal) {
+            arcVal.textContent = (health * 100).toFixed(0);
+            arcVal.style.color = healthColor;
+        }
+    });
+    
+    // Γ* computation
+    let gammaProduct = 1;
+    let gammaCount = 0;
+    
+    // Public math (always contributes)
+    config.mathSequences.forEach(seq => {
+        const normalized = mathRatios[seq] / targets[seq];
+        gammaProduct *= normalized;
+        gammaCount++;
+    });
+    
+    // Active interface channels
+    activeInterfaces.forEach(ch => {
+        const normalized = interfaceValues[ch];
+        gammaProduct *= normalized;
+        gammaCount++;
+    });
+    
+    const gammaRaw = Math.pow(gammaProduct, 1 / gammaCount);
+    emaGamma = EMA_ALPHA * gammaRaw + (1 - EMA_ALPHA) * emaGamma;
+    const gamma = emaGamma;
+    const gammaError = Math.abs(gamma - 1);
+    
+    const ramosTime = n - config.delta * (2 - gamma);
+    const timeDelta = Math.abs(n - ramosTime);
+    const omega = (n * gamma * PHI / (PHI + 1));
+    
+    // Update displays
+    config.mathSequences.forEach(seq => {
+        const el = document.getElementById(`${seq}Ratio`);
+        if (el) el.textContent = mathRatios[seq].toFixed(6);
+    });
+    
+    document.getElementById('gammaValue').textContent = gamma.toFixed(8);
+    document.getElementById('clockDisplay').textContent = `n = ${n.toLocaleString()}`;
+    document.getElementById('ramosTimeDisplay').textContent = `${config.rtSymbol} = ${ramosTime.toFixed(2)}`;
+    document.getElementById('timeDelta').textContent = `Δ = ${timeDelta.toFixed(4)}`;
+    document.getElementById('gammaDisplay').textContent = gamma.toFixed(6);
+    document.getElementById('psiDisplay').textContent = (gamma * Math.log(n)).toFixed(4);
+    document.getElementById('omegaDisplay').textContent = omega.toFixed(2);
+    
+    const publicCount = getChannelsByType(CHANNEL_TYPES.PUBLIC).length;
+    const sharedActive = getActiveChannelsByType(CHANNEL_TYPES.SHARED).length;
+    const sharedTotal = getChannelsByType(CHANNEL_TYPES.SHARED).length;
+    const protUserActive = getActiveChannelsByType(CHANNEL_TYPES.PROTECTED_USER).length;
+    const protUserTotal = getChannelsByType(CHANNEL_TYPES.PROTECTED_USER).length;
+    const openUserActive = getActiveChannelsByType(CHANNEL_TYPES.OPEN_USER).length;
+    const openUserTotal = getChannelsByType(CHANNEL_TYPES.OPEN_USER).length;
+    
+    document.getElementById('activeChannelsDisplay').innerHTML = 
+        `<span class="public">Public: ${publicCount} ✓</span> | ` +
+        `Shared: <span class="count">${sharedActive}/${sharedTotal}</span> | ` +
+        `<span class="protected-user">Prot.User: ${protUserActive}/${protUserTotal}</span> | ` +
+        `Open: <span class="count">${openUserActive}/${openUserTotal}</span> | ` +
+        `Blocked: <span class="blocked">${blockedCount}</span>`;
+    
+    updateTrinityUI();
+    
+    const gammaCheck = Math.abs(gamma - 1) < tol.gamma;
+    
+    // Verification status
+    const verifyHtml = [];
+    config.mathSequences.forEach(seq => {
+        const info = MATH_INFO[seq];
+        if (info) verifyHtml.push(`<div class="verify-item public">${info.symbol}: ✓</div>`);
+    });
+    
+    getSensorChannels().forEach(ch => {
+        const status = getInterfaceStatus(ch.name);
+        if (status === 'blocked') {
+            verifyHtml.push(`<div class="verify-item blocked">📡: ⊘</div>`);
+        } else if (status === 'suspect' || status === 'recovering') {
+            verifyHtml.push(`<div class="verify-item fail">📡: ⚠</div>`);
+        } else {
+            verifyHtml.push(`<div class="verify-item shared">📡: ✓</div>`);
+        }
+    });
+    
+    getUserChannels().forEach(ch => {
+        const status = getInterfaceStatus(ch.name);
+        const typeClass = ch.type === CHANNEL_TYPES.PROTECTED_USER ? 'protected-user' : 'open-user';
+        if (status === 'blocked') {
+            verifyHtml.push(`<div class="verify-item blocked">${ch.icon}: ⊘</div>`);
+        } else if (status === 'suspect' || status === 'recovering') {
+            verifyHtml.push(`<div class="verify-item fail">${ch.icon}: ⚠</div>`);
+        } else {
+            verifyHtml.push(`<div class="verify-item ${typeClass}">${ch.icon}: ✓</div>`);
+        }
+    });
+    
+    verifyHtml.push(`<div class="verify-item ${gammaCheck ? 'pass' : 'fail'}">${config.symbol}: ${gammaCheck ? '✓' : '○'}</div>`);
+    document.getElementById('verificationStatus').innerHTML = verifyHtml.join('');
+    
+    // Lock stability with noise boost
+    const noiseBoost = trinityState.noiseConfidenceBoost / 100;
+    const effectiveStability = gammaCheck ? lockStability + 1 + noiseBoost : Math.max(0, lockStability - 0.5);
+    lockStability = Math.min(currentDimension, effectiveStability);
+    
+    gammaHistory.push(gammaCheck);
+    if (gammaHistory.length > currentDimension) gammaHistory.shift();
+    
+    const requiredStable = Math.max(3, Math.ceil(currentDimension * 0.8));
+    gammaLocked = lockStability >= currentDimension && 
+                  gammaHistory.length >= requiredStable && 
+                  gammaHistory.slice(-requiredStable).every(x => x) &&
+                  !protectedAnomaly;
+    
+    const baseConfidence = (lockStability / currentDimension) * 100;
+    const confidence = Math.min(100, baseConfidence + trinityState.noiseConfidenceBoost);
+    document.getElementById('confidenceFill').style.width = `${confidence}%`;
+    document.getElementById('confidenceLabel').textContent = `Lock Confidence: ${confidence.toFixed(0)}% (Noise: +${trinityState.noiseConfidenceBoost.toFixed(1)}%)`;
+    
+    const allInterfacesActive = activeInterfaces.length === getAuditedChannels().length;
+    const convergenceRate = getAuditedChannels().length > 0 ? activeInterfaces.length / getAuditedChannels().length : 1;
+    document.getElementById('convergenceFill').style.width = `${convergenceRate * 100}%`;
+    
+    // Determine system state
+    let systemState, stateDetail;
+    if (gammaLocked && allInterfacesActive) {
+        systemState = 'locked';
+        stateDetail = `${currentDimension}D verified. All channels secure.`;
+    } else if (protectedAnomaly) {
+        systemState = 'critical';
+        stateDetail = `Protected user channel anomaly detected. Heightened sensitivity triggered.`;
+    } else if (blockedCount > 0) {
+        systemState = 'degraded';
+        stateDetail = `${blockedCount} channel(s) blocked. Public math verified.`;
+    } else {
+        systemState = 'valid';
+        stateDetail = `All channels active. Security matrix verified.`;
+    }
+    
+    updateSystemStateBanner(systemState, stateDetail);
+    
+    // Update output panel
+    document.getElementById('anchorGamma').textContent = gamma.toFixed(8);
+    document.getElementById('anchorError').textContent = gammaError.toExponential(2);
+    document.getElementById('anchorPublic').textContent = '✓';
+    document.getElementById('anchorShared').textContent = `${sharedActive}/${sharedTotal}`;
+    document.getElementById('anchorUsers').textContent = `${protUserActive + openUserActive}/${protUserTotal + openUserTotal}`;
+    document.getElementById('anchorState').textContent = gammaLocked ? 'LOCKED' : (protectedAnomaly ? 'CRITICAL' : (blockedCount > 0 ? 'DEGRADED' : 'VALID'));
+    
+    const stateMetric = document.getElementById('anchorStateMetric');
+    stateMetric.className = 'anchor-metric' + 
+        (gammaLocked ? ' primary' : protectedAnomaly ? ' critical' : blockedCount > 0 ? ' warning' : '');
+    
+    const userMetric = document.getElementById('anchorUserMetric');
+    userMetric.className = 'anchor-metric' + (protectedAnomaly ? ' critical' : '');
+    
+    // Gamma lock indicator
+    const lockIndicator = document.getElementById('gammaLockIndicator');
+    const lockText = document.getElementById('lockText');
+    const gammaClock = document.getElementById('gammaClock');
+    
+    gammaClock.classList.remove('gamma-locked', 'degraded-mode', 'critical-mode', 'invalid-mode');
+    lockIndicator.classList.remove('locked', 'degraded', 'critical', 'invalid');
+    lockText.classList.remove('locked', 'degraded', 'critical', 'invalid');
+    
+    if (gammaLocked && allInterfacesActive) {
+        lockIndicator.classList.add('locked');
+        lockText.classList.add('locked');
+        lockText.textContent = `✓ ${currentDimension}D LOCK — VERIFIED`;
+        gammaClock.classList.add('gamma-locked');
+    } else if (protectedAnomaly) {
+        lockText.textContent = `⚠️ PROTECTED USER ANOMALY`;
+        lockText.classList.add('critical');
+        lockIndicator.classList.add('critical');
+        gammaClock.classList.add('critical-mode');
+    } else if (blockedCount > 0) {
+        lockText.textContent = `DEGRADED (${blockedCount} blocked)`;
+        lockText.classList.add('degraded');
+        lockIndicator.classList.add('degraded');
+        gammaClock.classList.add('degraded-mode');
+    } else {
+        lockText.textContent = `AWAITING LOCK (${gammaHistory.filter(x => x).length}/${requiredStable})`;
+    }
+    
+    // Audit log
+    const isPow2 = (n & (n-1)) === 0 && n > 2;
+    const isDecade = [10, 50, 100, 500, 1000, 5000, 10000].includes(n);
+    
+    if (isPow2 || isDecade) {
+        const row = document.createElement('tr');
+        row.className = 'new';
+        if (gammaLocked) row.classList.add('gamma-lock-row');
+        if (protectedAnomaly) row.classList.add('critical-row');
+        else if (blockedCount > 0) row.classList.add('channel-drop-row');
+        
+        let cells = `<td>${n.toLocaleString()}</td>`;
+        ['fib', 'luc', 'cat', 'motz', 'pell'].forEach(seq => {
+            const info = MATH_INFO[seq];
+            cells += `<td style="color:${info.color}">${mathRatios[seq].toFixed(4)}</td>`;
+        });
+        
+        // Sensor status
+        const sensorCh = getSensorChannels()[0];
+        const sensorStatus = sensorCh ? getInterfaceStatus(sensorCh.name) : 'healthy';
+        const sensorColor = sensorStatus === 'healthy' ? '#44ff88' : sensorStatus === 'blocked' ? '#ff4444' : '#ffaa00';
+        const sensorSymbol = sensorStatus === 'healthy' ? '✓' : sensorStatus === 'blocked' ? '✗' : '⚠';
+        cells += `<td style="color:${sensorColor}">${sensorSymbol}</td>`;
+        
+        // Protected user status
+        const protUsers = getUserChannels().filter(ch => ch.type === CHANNEL_TYPES.PROTECTED_USER);
+        const protUserStatus = protUsers.every(ch => getInterfaceStatus(ch.name) === 'healthy') ? 'healthy' :
+                              protUsers.some(ch => interfaceBlocked[ch.name]) ? 'blocked' : 'suspect';
+        const protColor = protUserStatus === 'healthy' ? 'var(--protected-user-color)' : protUserStatus === 'blocked' ? '#ff4444' : '#ffaa00';
+        const protSymbol = protUserStatus === 'healthy' ? '✓' : protUserStatus === 'blocked' ? '✗' : '⚠';
+        cells += `<td style="color:${protColor}">${protSymbol}</td>`;
+        
+        // Open user status
+        const openUsers = getUserChannels().filter(ch => ch.type === CHANNEL_TYPES.OPEN_USER);
+        const openUserStatus = openUsers.every(ch => getInterfaceStatus(ch.name) === 'healthy') ? 'healthy' :
+                              openUsers.some(ch => interfaceBlocked[ch.name]) ? 'blocked' : 'suspect';
+        const openColor = openUserStatus === 'healthy' ? 'var(--open-user-color)' : openUserStatus === 'blocked' ? '#ff4444' : '#ffaa00';
+        const openSymbol = openUserStatus === 'healthy' ? '✓' : openUserStatus === 'blocked' ? '✗' : '⚠';
+        cells += `<td style="color:${openColor}">${openSymbol}</td>`;
+        
+        cells += `<td class="convergence">${gamma.toFixed(5)}</td>`;
+        cells += `<td style="color:var(--cat-color)">+${trinityState.noiseConfidenceBoost.toFixed(1)}%</td>`;
+        
+        const stateSymbol = gammaLocked ? '🔒' : (protectedAnomaly ? '⚠️' : blockedCount > 0 ? '⚠' : '○');
+        const stateColor = gammaLocked ? '#44ff88' : (protectedAnomaly ? 'var(--protected-user-color)' : blockedCount > 0 ? '#ffaa00' : '#888');
+        cells += `<td style="color:${stateColor}">${stateSymbol}</td>`;
+        
+        row.innerHTML = cells;
+        document.getElementById('log').appendChild(row);
+        row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DIMENSION MANAGEMENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function setDimension(dim) {
+    currentDimension = dim;
+    document.querySelectorAll('.dim-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.dim-btn.d${dim}`).classList.add('active');
+    
+    const config = DIMENSION_CONFIG[dim];
+    document.getElementById('eqFormula').textContent = `${config.symbol}(n) = ∏(Sᵢ/Tᵢ)^(1/|𝒜|)`;
+    document.getElementById('eqName').textContent = `Robust ${config.name} Lock`;
+    document.getElementById('clockTitle').textContent = `⟨ ${dim}D SELF-VERIFIED TIME ⟩`;
+    document.getElementById('ramosLabel').textContent = `RAMOS TIME (${config.rtSymbol})`;
+    
+    await initTrinityChannels();
+    initInterfaceState();
+    buildMathGrid();
+    buildUserPanel();
+    buildSensorPanel();
+    buildChannelArcs();
+    resetState();
+}
+
+function buildMathGrid() {
+    const config = DIMENSION_CONFIG[currentDimension];
+    const grid = document.getElementById('mathGrid');
+    let html = '';
+    
+    config.mathSequences.forEach(seq => {
+        const info = MATH_INFO[seq];
+        if (info) {
+            const cellClass = seq.startsWith('zeta') ? 'zeta' : seq;
+            const noiseClass = info.noiseSource ? 'noise-source' : '';
+            html += `<div class="math-cell ${cellClass} ${noiseClass}"><div class="math-value" id="${seq}Ratio">—</div><div class="math-label">${info.label}</div><div class="math-target">→ ${info.targetStr}</div></div>`;
+        }
+    });
+    
+    html += `<div class="math-cell center"><div class="math-value" id="gammaValue">—</div><div class="math-label">${DIMENSION_CONFIG[currentDimension].symbol}</div><div class="math-target">→ 1.0</div></div>`;
+    
+    grid.innerHTML = html;
+}
+
+function resetState() {
+    n = 5;
+    fPrevPrev = 3n; fPrev = 5n; fCurr = 8n;
+    lPrevPrev = 4n; lPrev = 7n; lCurr = 11n;
+    cPrev = 5n; cCurr = 14n;
+    motzkinMemo = [1n, 1n, 2n, 4n, 9n, 21n];
+    mPrevPrev = 4n; mPrev = 9n; mCurr = 21n;
+    pPrevPrev = 5n; pPrev = 12n; pCurr = 29n;
+    
+    zetaSums = { 2: 0, 4: 0, 6: 0 };
+    for (let k = 1; k <= 5; k++) {
+        zetaSums[2] += 1 / (k * k);
+        zetaSums[4] += 1 / Math.pow(k, 4);
+        zetaSums[6] += 1 / Math.pow(k, 6);
+    }
+    
+    emaGamma = 1.0;
+    lockStability = 0;
+    gammaHistory = [];
+    gammaLocked = false;
+    
+    // Reset noise accumulators
+    trinityState.noiseAccumulator = {
+        catalan: { samples: [], variance: 0 },
+        motzkin: { samples: [], variance: 0 }
+    };
+    trinityState.noiseConfidenceBoost = 0;
+    
+    initInterfaceState();
+    
+    document.getElementById('log').innerHTML = '';
+    document.getElementById('gammaClock').classList.remove('gamma-locked', 'degraded-mode', 'critical-mode', 'invalid-mode');
+    updateSystemStateBanner('valid', 'System initialized. Security matrix active.');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RUN LOOP
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function run() {
+    while (running) {
+        const batchSize = n < 1000 ? 10 : n < 10000 ? 50 : 200;
+        for (let i = 0; i < batchSize && running; i++) await step();
+        await new Promise(r => setTimeout(r, 16));
+    }
+}
+
+async function start() { 
+    if (running) return; 
+    resetState(); 
+    await initTrinityChannels();
+    running = true; 
+    run(); 
+}
+
+function stop() { 
+    running = false; 
+}
+
+// Initialize
+(async () => {
+    await setDimension(5);
+})();
+</script>
+
+</body>
+</html>
