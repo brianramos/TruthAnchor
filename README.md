@@ -1,4 +1,4 @@
-# TruthAnchor v1  
+# TruthAnchor
 **Mathematical Root-of-Trust Architecture for Audited LLM Systems**
 
 ---
