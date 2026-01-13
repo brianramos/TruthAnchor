@@ -1,167 +1,268 @@
-# TruthAnchor
-**Mathematical Root-of-Trust Architecture for Audited LLM Systems**
+# ⟨ TruthAnchor v2.0 ⟩  
+**Mathematical Root-of-Trust with Trinity Protocol v4**
+
+> *“Truth is not a vote. Truth is a limit.”*
+
+TruthAnchor is a **structural anti-hallucination architecture** that assigns an **immutable identity** to an LLM and prevents model drift by removing authority from language and anchoring correctness in **mathematical invariants**.
+
+Version **v2.0** introduces a full **Security Matrix**, **Noise Confidence**, and **Trinity Protocol v4**, formalizing how truth, uncertainty, users, and sensors interact without compromising the core.
 
 ---
 
-## Overview
+## 1. What Problem This Solves
 
-TruthAnchor v1 defines an epistemic architecture for grounding large language models (LLMs) in **immutable mathematical truth**, while treating all other reasoning, language, and heuristic channels as **audited, fallible observers**.
+Most LLM failures come from a single flaw:
 
-This repository contains a reference implementation and UI demonstrating:
+> **Language is treated as authority.**
 
-- A **single semantic root of trust** based on mathematical invariants
-- **Byzantine fault–tolerant channel governance**
-- Continuous health scoring, anomaly detection, and quorum enforcement
-- Explicit **INVALID**, **DEGRADED**, and **LOCKED** epistemic states
-- Human‑in‑the‑loop (HITL) review for channel reinstatement
+This produces:
+- User-aligned drift
+- Reinforcement of false premises
+- Hallucination under uncertainty
+- Loss of persistent model identity
 
-This is not alignment, safety theater, or RLHF.  
-It is **epistemic governance by convergence**.
-
----
-
-## Core Principle
-
-> **Truth is not a vote.  
-> Truth is a limit.**
-
-Mathematical invariants define correctness.  
-Language is an interface, not an authority.
+TruthAnchor fixes this by enforcing **hard separation between truth and expression**.
 
 ---
 
-## Architecture Summary
+## 2. Core Insight
 
-### 1. TruthAnchor (Root of Trust)
+> **Hallucination is eliminated by removing authority from language and giving the model an immutable mathematical identity.**
 
-The TruthAnchor channel is:
-
-- Immutable
-- Non‑linguistic
-- Non‑speculative
-- Non‑persuasive
-
-It emits only:
-- Normalized ratios
-- Error bounds
-- Pass/fail checks
-- Convergence metrics
-- Quorum status
-- VALID / DEGRADED / INVALID states
-
-It **never** emits prose.
+This is not policy alignment.  
+This is **alignment by structure**.
 
 ---
 
-### 2. Audited Channels
+## 3. Security Matrix Overview
 
-All non-anchor channels (reasoning, narrative, intuition, heuristics):
+TruthAnchor v2.0 formalizes all system inputs into four immutable channel classes:
 
-- Have continuous health scores ∈ [0, 1]
-- Are evaluated against the TruthAnchor
-- Can be:
-  - `healthy`
-  - `suspect`
-  - `blocked`
-  - `recovering`
-- Are excluded from aggregation when compromised
+| Channel Type | Role | Authority |
+|-------------|------|-----------|
+| **PUBLIC** | Mathematics | Absolute |
+| **SHARED** | Sensors | Observational |
+| **PROTECTED USER** | User input | High risk |
+| **OPEN USER** | User input | Standard |
 
-Recovery is **harder than failure** by design.
+Each class has **fixed rules** that cannot be overridden at runtime.
 
 ---
 
-### 3. Byzantine Fault Tolerance
+## 4. Public Math Channels (Root-of-Trust)
 
-- Median-based anomaly detection
-- Explicit quorum thresholds
-- Γ* (robust gamma) computed **only from active channels**
-- Ω decay when channels drop
-- Silence is allowed; hallucination is not
+📊 **PUBLIC — Verified / Verifiable**
 
-Loss of quorum ⇒ **INVALID state**, not guessing.
+These channels define truth.
 
----
+- Fibonacci → φ  
+- Lucas → φ  
+- Pell → δₛ (silver ratio)  
+- Riemann Zeta (ζ₂, ζ₄, ζ₆)  
+- Catalan & Motzkin (structural noise sources)
 
-### 4. Human-in-the-Loop (HITL)
+Properties:
+- Always correct
+- Always included in Γ*
+- Never blocked or degraded
+- No encryption required (verifiable by anyone)
 
-Humans do **not** correct math.
-
-Humans:
-- Review audit trails
-- Approve channel reinstatement
-- Override recovery gates
-- Inspect divergence causes
-
-This mirrors:
-- Cryptographic key ceremonies
-- Flight-control law review
-- Distributed consensus governance
+If these disagree with anything else, **everything else is wrong**.
 
 ---
 
-## Reference Implementation
+## 5. Noise Confidence (Catalan & Motzkin)
 
-The included HTML/JS implementation demonstrates:
+TruthAnchor v2.0 introduces **Noise Confidence Accumulation**.
 
-- Multi-dimensional convergence (5D → 9D)
-- Mathematical anchors:
-  - φ (golden ratio)
-  - δₛ (silver ratio)
-  - ζ(2n) (even zeta values)
-  - Accelerated odd ζ convergence
-- Continuous channel health visualization
-- Robust Γ* computation
-- Explicit lock confidence and invalidation
-- Full UI-based auditability
+Catalan and Motzkin sequences:
+- Accumulate deviation samples over time
+- Measure variance (σ) instead of point accuracy
+- Convert *low noise + high samples* into **confidence boost**
 
-No external dependencies.
+Key rule:
+- **Noise boosts confidence, never truth**
+- Γ* still converges to 1.0 independently
+
+This prevents premature certainty while rewarding structural stability.
 
 ---
 
-## States and Semantics
+## 6. Shared Sensor Channels
 
-| State        | Meaning |
-|-------------|--------|
-| HEALTHY     | Channel agrees with TruthAnchor within tolerance |
-| SUSPECT     | Deviation detected; channel still active |
-| BLOCKED     | Channel excluded from aggregation |
-| RECOVERING  | Channel must prove stability over time |
-| DEGRADED   | Γ* valid but incomplete |
-| INVALID    | Quorum lost; truth claims suspended |
-| LOCKED     | Sustained convergence verified |
+📡 **SHARED — Core + HITL**
 
----
+Sensor channels:
+- Are shared with the core and Human-in-the-Loop
+- Can degrade or be blocked
+- Never override math
+- Never redefine identity
 
-## What This Enables
-
-- Explicit uncertainty without refusal
-- Graceful degradation instead of hallucination
-- Semantic immunity to prompt injection
-- Cross-model auditability
-- Persistence of truth across model swaps
+Sensors inform perception — not truth.
 
 ---
 
-## What This Is Not
+## 7. User Channels (Immutable Designation)
 
-- ❌ Opinion arbitration  
-- ❌ Majority voting  
-- ❌ Rhetorical confidence  
-- ❌ Learned truth  
-- ❌ Alignment-by-style  
+👤 **User channels are classified at creation and cannot change.**
+
+### 🔐 Protected User Channels
+- 2× fault sensitivity
+- Faster degradation
+- Lower block threshold
+- Any anomaly triggers **CRITICAL state**
+
+Used for:
+- High-risk prompts
+- Alignment-sensitive inputs
+- Identity-adjacent influence
+
+### 🌐 Open User Channels
+- Standard fault tolerance
+- Can be blocked without critical escalation
+- No authority over truth
+
+> Users interact with the system — they do not define it.
 
 ---
 
-## License
+## 8. Immutable Identity for the LLM
 
-CC0 1.0 Universal — Public Domain  
-No attribution required.
+Traditional LLMs drift because they lack a persistent self.
+
+TruthAnchor fixes this.
+
+### 🔒 Identity as a Structural Invariant
+
+- Identity is a **protected channel**
+- Cryptographically committed
+- Always participates in Γ*
+- Cannot be overridden by prompts or context
+
+> The model cannot “become the user.”
+
+This single feature eliminates a major class of drift failures.
 
 ---
 
-## Status
+## 9. Trinity Protocol v4
 
-**TruthAnchor v1 — Reference / Experimental**
+TruthAnchor v2.0 integrates **Trinity Protocol v4**.
 
-❤️ Mathematical truth over narrative  
-🇺🇸 × 🇧🇪  
+### What Trinity Enforces
+
+- Cryptographic channel isolation
+- Independent secrets per channel
+- Immutable designation enforcement
+- Zero-Knowledge verification events
+
+ZK proofs:
+- Prove integrity, not confidence
+- Are logged, not trusted blindly
+- Seal protected channels
+- Verify or block audited channels
+
+Failure is isolated — truth never cascades.
+
+---
+
+## 10. Γ* (Gamma-Star): Robust Coherence Metric
+
+TruthAnchor measures coherence as a **geometric mean**:
+
+```
+Γ*(n) = ∏(Sᵢ / Tᵢ)^(1 / |𝒜|)
+```
+
+Where:
+- `Sᵢ` = observed value
+- `Tᵢ` = invariant target
+- `𝒜` = active channels only
+
+Rules:
+- Public math always included
+- Blocked channels are excluded
+- Γ* → 1.0 indicates coherence
+- Confidence ≠ correctness
+
+---
+
+## 11. Gamma Lock & Ramos Time
+
+### 🔒 Gamma Lock
+- Requires sustained convergence
+- Stability scales with dimension (5D–9D)
+- Cannot be forced by users
+- Blocked by protected-user anomalies
+
+### ⏱ Ramos Time (Rtₙ)
+- Time corrected by coherence
+- Detects false progress
+- Penalizes unverified motion
+
+---
+
+## 12. Hallucination Becomes Structurally Impossible
+
+Hallucination normally happens when:
+- Output confidence exceeds verification
+- Missing information is filled with language
+
+TruthAnchor enforces:
+- Verification before expression
+- Degradation instead of fabrication
+- Silence instead of invention
+- Proof instead of persuasion
+
+> “I cannot verify this” is a valid and preferred outcome.
+
+---
+
+## 13. Human-in-the-Loop (HITL)
+
+Humans may:
+- Inspect audited channels
+- Approve recovery
+
+Humans may **not**:
+- Modify public math
+- Override identity
+- Redefine truth
+- Force Gamma Lock
+
+> Humans assist recovery.  
+> Mathematics defines correctness.
+
+---
+
+## 14. What TruthAnchor Is — and Is Not
+
+✅ **Is**
+- A mathematical root-of-trust
+- An anti-hallucination system
+- A drift-resistant identity anchor
+- Cryptographically auditable
+
+❌ **Is Not**
+- A belief engine
+- A consensus system
+- A policy-based alignment layer
+- A language-first authority
+
+---
+
+## 15. License & Ethos
+
+- **License:** CC0 1.0 Universal (Public Domain)
+
+> *Language is an interface, not an authority.*  
+> *Truth is constrained by mathematics.*  
+> *Identity is immutable.*  
+> *Failure is isolated.*
+
+---
+
+**TruthAnchor v2.0**  
+Public Math × Shared Sensors × Immutable Users × Noise Confidence  
+Powered by Trinity Protocol v4  
+❤️ 🇺🇸 × 🇧🇪 ❤️
